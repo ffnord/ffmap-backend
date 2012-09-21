@@ -6,7 +6,6 @@ class Node():
     self.interfaces = dict()
     self.flags = dict({
       "online": False,
-      "vpn": False,
       "gateway": False,
       "client": False
     })
