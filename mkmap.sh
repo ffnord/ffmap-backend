@@ -21,4 +21,3 @@ batctl vd json | "$(dirname "$0")"/bat2nodes.py -a "$(dirname "$0")"/aliases.jso
 
 mv $DEST/nodes.json.new $DEST/nodes.json
 
-"$(dirname "$0")"/nodes2bathosts.py < $DEST/nodes.json > /etc/bat-hosts
