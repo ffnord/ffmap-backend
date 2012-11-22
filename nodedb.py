@@ -170,7 +170,10 @@ class NodeDB:
       try:
         node = self.maybe_node_by_mac((mac, ))
       except:
-        continue
+        # create an offline node
+        node = Node()
+        node.add_mac(mac)
+        self._nodes.append(node)
 
       node.name = alias['name']
 
