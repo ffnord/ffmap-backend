@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# TODO
-# Gatewayliste
-# aliases.json
-
 import json
 import fileinput
 import argparse
@@ -24,6 +20,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-a', '--aliases',
                   help='read aliases from FILE',
+                  action='append',
                   metavar='FILE')
 
 parser.add_argument('-g', '--gateway', action='append',
@@ -36,13 +33,12 @@ args = parser.parse_args()
 options = vars(args)
 
 db = NodeDB()
-
+print(options)
 db.import_batman(list(fileinput.input(options['batmanjson'])))
 
-db.import_wikigps("http://freifunk.metameute.de/wiki/Knoten")
-
 if options['aliases']:
-  db.import_aliases(json.load(open(options['aliases'])))
+  for aliases in options['aliases']:
+    db.import_aliases(json.load(open(aliases)))
 
 if options['gateway']:
   db.mark_gateways(options['gateway'])
