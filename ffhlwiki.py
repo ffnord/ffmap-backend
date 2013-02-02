@@ -45,7 +45,7 @@ def import_wikigps(url):
 
   nodes = fetch_wikitable(url)
 
-  aliases = []
+  aliases = {}
 
   for node in nodes:
     try:
@@ -68,7 +68,7 @@ def import_wikigps(url):
     for data in nodes:
       alias = {}
 
-      alias['mac'] = data[0].strip()
+      mac = data[0].strip()
 
       if data[1]:
         alias['gps'] = data[1].strip()
@@ -76,7 +76,7 @@ def import_wikigps(url):
       if data[2]:
         alias['name'] = data[2].strip()
 
-      aliases.append(alias)
+      aliases[mac] = alias
 
   return aliases
 
