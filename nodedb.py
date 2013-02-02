@@ -164,7 +164,7 @@ class NodeDB:
   def import_aliases(self, aliases):
     for mac, alias in aliases.items():
       try:
-        node = self.maybe_node_by_mac((mac, ))
+        node = self.maybe_node_by_fuzzy_mac(mac)
       except:
         # create an offline node
         node = Node()
