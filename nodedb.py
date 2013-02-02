@@ -171,7 +171,8 @@ class NodeDB:
         node.add_mac(mac)
         self._nodes.append(node)
 
-      node.name = alias['name']
+      if 'name' in alias:
+        node.name = alias['name']
 
       if 'vpn' in alias and alias['vpn']:
         node.interfaces[mac].vpn = True
