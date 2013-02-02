@@ -33,7 +33,6 @@ args = parser.parse_args()
 options = vars(args)
 
 db = NodeDB()
-print(options)
 db.import_batman(list(fileinput.input(options['batmanjson'])))
 
 if options['aliases']:
