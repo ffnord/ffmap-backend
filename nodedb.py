@@ -3,10 +3,6 @@ from functools import reduce
 from collections import defaultdict
 from node import Node, Interface
 from link import Link, LinkConnector
-from itertools import zip_longest
-
-from bs4 import BeautifulSoup
-from urllib.request import urlopen
 
 class NodeDB:
   def __init__(self):
@@ -212,83 +208,6 @@ class NodeDB:
             changes += 1
 
           link.type = "vpn"
-
-  def import_wikigps(self, url):
-    def fetch_wikitable(url):
-      f = urlopen(url)
-
-      soup = BeautifulSoup(f)
-
-      table = soup.find_all("table")[0]
-
-      rows = table.find_all("tr")
-
-      headers = []
-
-      data = []
-
-      def maybe_strip(x):
-        if isinstance(x.string, str):
-          return x.string.strip()
-        else:
-          return ""
-
-      for row in rows:
-        tds = list([maybe_strip(x) for x in row.find_all("td")])
-        ths = list([maybe_strip(x) for x in row.find_all("th")])
-
-        if any(tds):
-          data.append(tds)
-
-        if any(ths):
-          headers = ths
-
-      nodes = []
-
-      for d in data:
-        nodes.append(dict(zip(headers, d)))
-
-      return nodes
-
-    nodes = fetch_wikitable(url)
-
-    for node in nodes:
-      try:
-        node['MAC'] = node['MAC'].split(',')
-      except KeyError:
-        pass
-
-      try:
-        node['GPS'] = node['GPS'].split(',')
-      except KeyError:
-        pass
-
-      try:
-        node['Knotenname'] = node['Knotenname'].split(',')
-      except KeyError:
-        pass
-
-      nodes = zip_longest(node['MAC'], node['GPS'], node['Knotenname'])
-
-
-      for data in nodes:
-        mac = data[0].strip()
-        if not mac:
-          continue
-
-        try:
-          node = self.maybe_node_by_fuzzy_mac(mac)
-        except KeyError:
-          node = Node()
-          self._nodes.append(node)
-
-        node.add_mac(mac)
-
-        if data[1]:
-          node.gps = data[1].strip()
-
-        if data[2]:
-          node.name = data[2].strip()
 
 # compares two MACs and decides whether they are
 # similar and could be from the same node
