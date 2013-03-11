@@ -12,9 +12,9 @@ import locale                                  # Ensures that subsequent open()s
 locale.getpreferredencoding = lambda: 'UTF-8'  # are UTF-8 encoded.
 
 import sys
-sys.stdin = open('/dev/stdin', 'r')
-sys.stdout = open('/dev/stdout', 'w')
-sys.stderr = open('/dev/stderr', 'w')
+#sys.stdin = open('/dev/stdin', 'r')
+#sys.stdout = open('/dev/stdout', 'w')
+#sys.stderr = open('/dev/stderr', 'w')
 
 parser = argparse.ArgumentParser()
 
