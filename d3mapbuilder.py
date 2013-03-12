@@ -8,8 +8,7 @@ class D3MapBuilder:
   def build(self):
     output = dict()
 
-    now = datetime.datetime.utcnow()
-    now.microsecond = 0
+    now = datetime.datetime.utcnow().replace(microsecond=0)
 
     nodes = self._db.get_nodes()
 
