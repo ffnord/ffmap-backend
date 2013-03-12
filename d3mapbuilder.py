@@ -8,6 +8,9 @@ class D3MapBuilder:
   def build(self):
     output = dict()
 
+    now = datetime.datetime.utcnow()
+    now.microsecond = 0
+
     nodes = self._db.get_nodes()
 
     output['nodes'] = [{'name': x.name, 'id': x.id,
@@ -25,7 +28,7 @@ class D3MapBuilder:
                        } for x in links]
 
     output['meta'] = {
-                      'timestamp': datetime.datetime.utcnow().isoformat()
+                      'timestamp': now.isoformat()
                      }
 
     return json.dumps(output)
