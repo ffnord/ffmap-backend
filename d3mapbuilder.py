@@ -1,4 +1,5 @@
 import json
+import datetime
 
 class D3MapBuilder:
   def __init__(self, db):
@@ -22,6 +23,10 @@ class D3MapBuilder:
                         'type': x.type,
                         'id': x.id
                        } for x in links]
+
+    output['meta'] = {
+                      'timestamp': datetime.datetime.utcnow().isoformat()
+                     }
 
     return json.dumps(output)
 
