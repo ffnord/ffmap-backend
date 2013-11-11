@@ -36,11 +36,8 @@ class NodeDB:
 
     raise
 
-  # import_batman(list(fileinput.input(options['batmanjson'])))
-  def import_batman(self, lines):
-
-    for line in lines:
-      x = json.loads(line)
+  def parse_vis_data(self,vis_data):
+    for x in vis_data:
 
       if 'of' in x:
         try:
@@ -53,8 +50,7 @@ class NodeDB:
         node.add_mac(x['of'])
         node.add_mac(x['secondary'])
 
-    for line in lines:
-      x = json.loads(line)
+    for x in vis_data:
 
       if 'router' in x:
         try:
@@ -95,8 +91,7 @@ class NodeDB:
           node.add_mac(x['neighbor'])
           self._nodes.append(node)
 
-    for line in lines:
-      x = json.loads(line)
+    for x in vis_data:
 
       if 'router' in x:
         try:
@@ -127,8 +122,7 @@ class NodeDB:
 
         self._links.append(link)
 
-    for line in lines:
-      x = json.loads(line)
+    for x in vis_data:
 
       if 'primary' in x:
         try:

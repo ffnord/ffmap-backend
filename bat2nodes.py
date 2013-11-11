@@ -4,6 +4,7 @@ import json
 import fileinput
 import argparse
 
+from batman import batman
 from nodedb import NodeDB
 from d3mapbuilder import D3MapBuilder
 
@@ -23,24 +24,29 @@ parser.add_argument('-a', '--aliases',
                   action='append',
                   metavar='FILE')
 
-parser.add_argument('-g', '--gateway', action='append',
-                  help='MAC of a gateway')
-
-parser.add_argument('batmanjson', help='output of batman vd json')
+parser.add_argument('-m', '--mesh', action='append',
+                  help='batman mesh interface')
 
 args = parser.parse_args()
 
 options = vars(args)
 
 db = NodeDB()
-db.import_batman(list(fileinput.input(options['batmanjson'])))
+if options['mesh']:
+  for mesh_interface in options['mesh']:
+    bm = batman(mesh_interface)
+    db.parse_vis_data(bm.vis_data())
+    for gw in bm.gateway_list():
+      db.mark_gateways(gw.mac)
+else:
+  bm = batman()
+  db.parse_vis_data(bm.vis_data())
+  for gw in bm.gateway_list():
+    db.mark_gateways([gw['mac']])
 
 if options['aliases']:
   for aliases in options['aliases']:
     db.import_aliases(json.load(open(aliases)))
-
-if options['gateway']:
-  db.mark_gateways(options['gateway'])
 
 m = D3MapBuilder(db)
 
