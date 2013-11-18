@@ -28,6 +28,9 @@ parser.add_argument('-g', '--gateway', action='append',
 
 parser.add_argument('batmanjson', help='output of batman vd json')
 
+parser.add_argument('-d', '--destination-directory', action='store',
+                  help='destination directory for generated files',required=True)
+
 args = parser.parse_args()
 
 options = vars(args)
@@ -44,4 +47,6 @@ if options['gateway']:
 
 m = D3MapBuilder(db)
 
-print(m.build())
+nodes_json = open(options['destination_directory'] + '/nodes.json.new','w')
+nodes_json.write(m.build())
+nodes_json.close()
