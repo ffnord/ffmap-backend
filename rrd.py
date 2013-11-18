@@ -110,10 +110,12 @@ class rrd:
         else:
           clientCount += 1
     for link in db.get_links():
-      if link.source in nodes and not link.target in nodes:
-        nodes[link.source].clients += 1
-      elif link.target in nodes and not link.source in nodes:
-        nodes[link.source].clients += 1
+      source = link.source.interface
+      target = link.target.interface
+      if source in nodes and not target in nodes:
+        nodes[source].clients += 1
+      elif target in nodes and not source in nodes:
+        nodes[target].clients += 1
 
     self.checkAndCreateIfNeededGlobalDatabase()
     self.updateGlobalDatabase(len(nodes),clientCount)
