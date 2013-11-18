@@ -92,11 +92,17 @@ class rrd:
     subprocess.check_output(args)
 
   def createNodeGraph(self,nodePrimaryMAC,displayTimeNode):
-    nodeGraph = self.nodeMACToPNGFile(nodePrimaryMAC + '_upstate')
+    nodeGraph = self.nodeMACToPNGFile(nodePrimaryMAC)
     nodeFile  = self.nodeMACToRRDFile(nodePrimaryMAC)
-    args = ['rrdtool', 'graph', nodeGraph, '-s', '-' + self.displayTimeNode , '-w', '800', '-h' '400'
-           ,'DEF:upstate=' + nodeFile + ':upstate:LAST', 'LINE1:upstate#F00:upstate\\l'
-           ]
+    args = ['rrdtool','graph', nodeGraph, '-s', '-' + self.displayTimeNode , '-w', '800', '-h', '400', '-l', '0', '-y', '1:1',
+            'DEF:clients=' + nodeFile + ':clients:LAST',
+            'VDEF:maxc=clients,MAXIMUM',
+            'CDEF:c=0,clients,ADDNAN',
+            'CDEF:d=clients,UN,maxc,UN,1,maxc,IF,*',
+            'AREA:c#0F0:up\\l',
+            'AREA:d#F00:down\\l',
+            'LINE1:c#00F:clients connected\\l',
+            ]
     subprocess.check_output(args)
 
   def update_database(self,db):
