@@ -9,7 +9,7 @@ from d3mapbuilder import D3MapBuilder
 
 # Force encoding to UTF-8
 import locale                                  # Ensures that subsequent open()s
-locale.getpreferredencoding = lambda: 'UTF-8'  # are UTF-8 encoded.
+locale.getpreferredencoding = lambda _=None: 'UTF-8'  # are UTF-8 encoded.
 
 import sys
 #sys.stdin = open('/dev/stdin', 'r')
