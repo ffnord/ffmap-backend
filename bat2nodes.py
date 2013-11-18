@@ -3,7 +3,9 @@
 import json
 import fileinput
 import argparse
+import os
 
+from rrd import rrd
 from nodedb import NodeDB
 from d3mapbuilder import D3MapBuilder
 
@@ -44,6 +46,12 @@ if options['aliases']:
 
 if options['gateway']:
   db.mark_gateways(options['gateway'])
+
+scriptdir = os.path.dirname(os.path.realpath(__file__))
+
+rrd = rrd(scriptdir +  "/nodedb/",options['destination_directory'] + "/nodes")
+rrd.update_database(db)
+rrd.update_images()
 
 m = D3MapBuilder(db)
 
