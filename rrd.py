@@ -15,9 +15,14 @@ class rrd:
     self.imagePath = imagePath
     self.displayTimeGlobal = displayTimeGlobal
     self.displayTimeNode = displayTimeNode
-    
+
     self.currentTimeInt = (int(time.time())/60)*60
     self.currentTime    = str(self.currentTimeInt)
+
+    try:
+      os.stat(self.imagePath)
+    except:
+      os.mkdir(self.imagePath)
 
   def checkAndCreateIfNeededGlobalDatabase(self):
     """ Creates the global database file iff it did not exist.
