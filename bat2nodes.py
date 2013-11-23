@@ -53,9 +53,6 @@ if options['aliases']:
   for aliases in options['aliases']:
     db.import_aliases(json.load(open(aliases)))
 
-if options['gateway']:
-  db.mark_gateways(options['gateway'])
-
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 
 rrd = rrd(scriptdir +  "/nodedb/", options['destination_directory'] + "/nodes")
