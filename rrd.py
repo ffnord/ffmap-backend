@@ -144,6 +144,9 @@ class rrd:
     nodeDbFiles = os.listdir(self.dbPath)
 
     for fileName in nodeDbFiles:
+      if not os.path.isfile(fileName):
+        continue
+
       nodeName = os.path.basename(fileName).split('.')
       if nodeName[1] == 'rrd' and not nodeName[0] == "nodes":
         self.createNodeGraph(nodeName[0],self.displayTimeNode)
