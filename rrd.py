@@ -144,7 +144,7 @@ class rrd:
     nodeDbFiles = os.listdir(self.dbPath)
 
     for fileName in nodeDbFiles:
-      if not os.path.isfile(fileName):
+      if not os.path.isfile(os.path.join(self.dbPath, fileName)):
         continue
 
       nodeName = os.path.basename(fileName).split('.')
