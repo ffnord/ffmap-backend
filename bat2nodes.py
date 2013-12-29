@@ -29,6 +29,9 @@ parser.add_argument('-a', '--aliases',
 parser.add_argument('-m', '--mesh', action='append',
                   help='batman mesh interface')
 
+parser.add_argument('-o', '--obscure', action='store_true',
+                  help='obscure client macs')
+
 parser.add_argument('-d', '--destination-directory', action='store',
                   help='destination directory for generated files',required=True)
 
@@ -52,6 +55,9 @@ else:
 if options['aliases']:
   for aliases in options['aliases']:
     db.import_aliases(json.load(open(aliases)))
+
+if options['obscure']:
+  db.obscure_clients()
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 
