@@ -211,6 +211,69 @@ class NodeDB:
 
           link.type = "vpn"
 
+  def obscure_clients(self):
+
+    globalIdCounter = 0
+    nodeCounters = {}
+    clientIds = {}
+
+    for node in self._nodes:
+      if node.flags['client']:
+        node.macs = set()
+        clientIds[node.id] = None
+        sys.stderr.write("client:" + node.id)
+
+    for link in self._links:
+      ids = link.source.interface
+      idt = link.target.interface
+      try:
+        node_source = self.maybe_node_by_fuzzy_mac(ids)
+        node_target = self.maybe_node_by_id(idt)
+        if ids in clientIds and idt in clientIds:
+          # This is for corner cases, when a client
+          # is linked to another client.
+          clientIds[ids] = str(globalIdCounter)
+          id1 = str(globalIdCounter)
+          globalIdCounter += 1
+
+          clientIds[idt] = str(globalIdCounter)
+          idt = str(globalIdCounter)
+          globalIdCounter += 1
+
+        elif ids in clientIds:
+          sys.stderr.write("passed ids")
+          newId = generateId(idt)
+          clientIds[ids] = newId
+          ids = newId
+
+          link.source.interface = ids;
+          node_source.id = ids;
+
+        elif idt in clientIds:
+          sys.stderr.write("passed idt")
+          newId = generateId(ids,nodeCounters)
+          clientIds[idt] = newId
+          idt = newId
+
+          link.target.interface = idt;
+          node_target.id = idt;
+
+        link.id = ids + "-" + idt
+
+      except:
+        raise
+
+# extends node id by incremented node counter
+def generateId(nodeId,nodeCounters):
+  if nodeId in nodeCounters:
+    n = nodeCounters[nodeId]
+    nodeCounters[nodeId] = n + 1
+  else:
+    nodeCounters[nodeId] = 1
+    n = 0
+
+  return nodeId + "_" + str(n)
+
 # compares two MACs and decides whether they are
 # similar and could be from the same node
 def is_similar(a, b):
