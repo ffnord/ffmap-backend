@@ -36,6 +36,13 @@ class NodeDB:
 
     raise
 
+  def maybe_node_by_id(self, mac):
+    for node in self._nodes:
+      if mac.lower() == node.id:
+        return node
+
+    raise
+
   def parse_vis_data(self,vis_data):
     for x in vis_data:
 
