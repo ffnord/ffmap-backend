@@ -34,14 +34,14 @@ class NodeDB:
         if mac.lower() in node.macs:
           return node
 
-    raise
+    raise KeyError
 
   def maybe_node_by_id(self, mac):
     for node in self._nodes:
       if mac.lower() == node.id:
         return node
 
-    raise
+    raise KeyError
 
   def parse_vis_data(self,vis_data):
     for x in vis_data:
@@ -221,7 +221,6 @@ class NodeDB:
       if node.flags['client']:
         node.macs = set()
         clientIds[node.id] = None
-        sys.stderr.write("client:" + node.id)
 
     for link in self._links:
       ids = link.source.interface
@@ -241,7 +240,6 @@ class NodeDB:
           globalIdCounter += 1
 
         elif ids in clientIds:
-          sys.stderr.write("passed ids")
           newId = generateId(idt)
           clientIds[ids] = newId
           ids = newId
@@ -250,7 +248,6 @@ class NodeDB:
           node_source.id = ids;
 
         elif idt in clientIds:
-          sys.stderr.write("passed idt")
           newId = generateId(ids,nodeCounters)
           clientIds[idt] = newId
           idt = newId
@@ -261,7 +258,7 @@ class NodeDB:
         link.id = ids + "-" + idt
 
       except:
-        raise
+        pass
 
 # extends node id by incremented node counter
 def generateId(nodeId,nodeCounters):
