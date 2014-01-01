@@ -67,6 +67,10 @@ rrd.update_images()
 
 m = D3MapBuilder(db)
 
-nodes_json = open(options['destination_directory'] + '/nodes.json','w')
+#Write nodes json
+nodes_json = open(options['destination_directory'] + '/nodes.json.new','w')
 nodes_json.write(m.build())
 nodes_json.close()
+
+#Move to destination
+os.rename(options['destination_directory'] + '/nodes.json.new',options['destination_directory'] + '/nodes.json')
