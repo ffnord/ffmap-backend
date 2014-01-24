@@ -10,10 +10,9 @@ class batman:
     self.mesh_interface = mesh_interface
 
   def vis_data(self):
-    """ Parse "batctl -m <mesh_interface> vd json -n" into an array of dictionaries.
-    """
-    output = subprocess.check_output(["batctl","-m",self.mesh_interface,"vd","json","-n"])
-    lines = output.splitlines()
+    return self.vis_data_batadv_vis() + self.vis_data_batctl_legacy()
+
+  def vis_data_helper(self,lines):
     vd = []
     for line in lines:
       try:
@@ -22,6 +21,20 @@ class batman:
       except e:
         pass
     return vd
+
+  def vis_data_batctl_legacy(self):
+    """ Parse "batctl -m <mesh_interface> vd json -n" into an array of dictionaries.
+    """
+    output = subprocess.check_output(["batctl","-m",self.mesh_interface,"vd","json","-n"])
+    lines = output.splitlines()
+    return self.vis_data_helper(lines)
+
+  def vis_data_batadv_vis(self):
+    """ Parse "batadv-vis -i <mesh_interface> -f json" into an array of dictionaries.
+    """
+    output = subprocess.check_output(["batadv-vis","-i",self.mesh_interface,"-f","json"])
+    lines = output.splitlines()
+    return self.vis_data_helper(lines)
 
   def gateway_list(self):
     """ Parse "batctl -m <mesh_interface> gwl -n" into an array of dictionaries.
