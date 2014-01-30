@@ -47,12 +47,12 @@ db = NodeDB()
 if options['mesh']:
   for mesh_interface in options['mesh']:
     bm = batman(mesh_interface)
-    db.parse_vis_data(bm.vis_data())
+    db.parse_vis_data(bm.vis_data(options['alfred']))
     for gw in bm.gateway_list():
       db.mark_gateways(gw.mac)
 else:
   bm = batman()
-  db.parse_vis_data(bm.vis_data())
+  db.parse_vis_data(bm.vis_data(options['alfred']))
   for gw in bm.gateway_list():
     db.mark_gateways([gw['mac']])
 

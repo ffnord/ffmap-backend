@@ -9,8 +9,11 @@ class batman:
   def __init__(self, mesh_interface = "bat0"):
     self.mesh_interface = mesh_interface
 
-  def vis_data(self):
-    return self.vis_data_batadv_vis() + self.vis_data_batctl_legacy()
+  def vis_data(self,batadv_vis=False):
+    vds = self.vis_data_batctl_legacy()
+    if batadv_vis:
+        vds += self.vis_data_batadv_vis()
+    return vds
 
   def vis_data_helper(self,lines):
     vd = []
