@@ -118,7 +118,8 @@ class rrd:
         if not node.flags['client']:
           nodes[node.id] = node
           node.clients = 0;
-          clientCount -= 1 # XXX: might not be needed with gluon/alfred
+          if 'legacy' in node.flags and node.flags['legacy']:
+            clientCount -= 1
         else:
           clientCount += 1
     for link in db.get_links():
