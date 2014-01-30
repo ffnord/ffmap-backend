@@ -6,6 +6,7 @@ import argparse
 import os
 
 from batman import batman
+from alfred import alfred
 from rrd import rrd
 from nodedb import NodeDB
 from d3mapbuilder import D3MapBuilder
@@ -32,6 +33,9 @@ parser.add_argument('-m', '--mesh', action='append',
 parser.add_argument('-o', '--obscure', action='store_true',
                   help='obscure client macs')
 
+parser.add_argument('-A', '--alfred', action='store_true',
+                  help='retrieve aliases from alfred')
+
 parser.add_argument('-d', '--destination-directory', action='store',
                   help='destination directory for generated files',required=True)
 
@@ -43,18 +47,22 @@ db = NodeDB()
 if options['mesh']:
   for mesh_interface in options['mesh']:
     bm = batman(mesh_interface)
-    db.parse_vis_data(bm.vis_data())
+    db.parse_vis_data(bm.vis_data(options['alfred']))
     for gw in bm.gateway_list():
       db.mark_gateways(gw.mac)
 else:
   bm = batman()
-  db.parse_vis_data(bm.vis_data())
+  db.parse_vis_data(bm.vis_data(options['alfred']))
   for gw in bm.gateway_list():
     db.mark_gateways([gw['mac']])
 
 if options['aliases']:
   for aliases in options['aliases']:
     db.import_aliases(json.load(open(aliases)))
+
+if options['alfred']:
+  af = alfred()
+  db.import_aliases(af.aliases())
 
 if options['obscure']:
   db.obscure_clients()

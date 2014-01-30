@@ -52,6 +52,8 @@ class NodeDB:
         except:
           node = Node()
           node.flags['online'] = True
+          if 'legacy' in x:
+            node.flags['legacy'] = True
           self._nodes.append(node)
 
         node.add_mac(x['of'])
@@ -65,6 +67,8 @@ class NodeDB:
         except:
           node = Node()
           node.flags['online'] = True
+          if 'legacy' in x:
+            node.flags['legacy'] = True
           node.add_mac(x['router'])
           self._nodes.append(node)
 
