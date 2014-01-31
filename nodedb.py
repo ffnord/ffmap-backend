@@ -232,6 +232,12 @@ class NodeDB:
       try:
         node_source = self.maybe_node_by_fuzzy_mac(ids)
         node_target = self.maybe_node_by_id(idt)
+
+        if not node_source.flags['client'] and not node_target.flags['client']:
+          # if none of the nodes associated with this link are clients,
+          # we do not want to obscure
+          continue
+
         if ids in clientIds and idt in clientIds:
           # This is for corner cases, when a client
           # is linked to another client.
