@@ -229,14 +229,21 @@ class NodeDB:
     for link in self._links:
       ids = link.source.interface
       idt = link.target.interface
+
       try:
         node_source = self.maybe_node_by_fuzzy_mac(ids)
         node_target = self.maybe_node_by_id(idt)
+
+        if not node_source.flags['client'] and not node_target.flags['client']:
+          # if none of the nodes associated with this link are clients,
+          # we do not want to obscure
+          continue
+
         if ids in clientIds and idt in clientIds:
           # This is for corner cases, when a client
           # is linked to another client.
           clientIds[ids] = str(globalIdCounter)
-          id1 = str(globalIdCounter)
+          ids = str(globalIdCounter)
           globalIdCounter += 1
 
           clientIds[idt] = str(globalIdCounter)
@@ -261,7 +268,7 @@ class NodeDB:
 
         link.id = ids + "-" + idt
 
-      except:
+      except KeyError:
         pass
 
 # extends node id by incremented node counter
