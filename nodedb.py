@@ -185,6 +185,9 @@ class NodeDB:
       if 'gps' in alias:
         node.gps = alias['gps']
 
+      if 'firmware' in alias:
+        node.firmware = alias['firmware']
+
   # list of macs
   # if options['gateway']:
   #   mark_gateways(options['gateway'])
