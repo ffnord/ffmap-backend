@@ -324,6 +324,9 @@ def is_derived_mac(a, b):
   except ValueError:
     return False
 
+  if mac_a[4] != mac_b[4] or mac_a[2] != mac_b[2] or mac_a[1] != mac_b[1]:
+    return False
+
   x = list(mac_a)
   x[5] += 1
   x[5] %= 255
