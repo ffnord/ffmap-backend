@@ -7,7 +7,9 @@ DEST=$1
 
 [ "$DEST" ] || exit 1
 
-"$(dirname "$0")"/ffhlwiki.py http://freifunk.metameute.de/wiki/Knoten > "$(dirname "$0")"/aliases_hl.json
-"$(dirname "$0")"/ffhlwiki.py http://freifunk.metameute.de/wiki/Moelln:Knoten > "$(dirname "$0")"/aliases_moelln.json
+cd "$(dirname "$0")"/
 
-"$(dirname "$0")"/bat2nodes.py -a "$(dirname "$0")"/aliases.json -a aliases_hl.json -a aliases_moelln.json -d $DEST $GWS
+./ffhlwiki.py http://freifunk.metameute.de/wiki/Knoten > aliases_hl.json
+./ffhlwiki.py http://freifunk.metameute.de/wiki/Moelln:Knoten > aliases_moelln.json
+
+./bat2nodes.py -a aliases.json -a aliases_hl.json -a aliases_moelln.json -d $DEST $GWS
