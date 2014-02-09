@@ -96,7 +96,7 @@ class rrd:
             ]
     subprocess.check_output(args)
 
-  def createNodeGraph(self,nodePrimaryMAC,displayTimeNode):
+  def createNodeGraph(self,nodePrimaryMAC):
     nodeGraph = self.nodeMACToPNGFile(nodePrimaryMAC)
     nodeFile  = self.nodeMACToRRDFile(nodePrimaryMAC)
     args = ['rrdtool','graph', nodeGraph, '-s', '-' + self.displayTimeNode , '-w', '800', '-h', '400', '-l', '0', '-y', '1:1',
@@ -150,4 +150,4 @@ class rrd:
 
       nodeName = os.path.basename(fileName).split('.')
       if nodeName[1] == 'rrd' and not nodeName[0] == "nodes":
-        self.createNodeGraph(nodeName[0],self.displayTimeNode)
+        self.createNodeGraph(nodeName[0])
