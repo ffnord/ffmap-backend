@@ -188,6 +188,21 @@ class NodeDB:
       if 'firmware' in alias:
         node.firmware = alias['firmware']
 
+      if 'firmware-base' in alias:
+        node.firmware-base = alias['firmware-base']
+
+      if 'hardware-model' in alias:
+        node.hardware-model = alias['hardware-model']
+
+      if 'selected-gateway' in alias:
+        node.selected-gateway = alias['selected-gateway']
+
+      if 'autoupdater-branch' in alias:
+        node.autoupdater-branch = alias['autoupdater-branch']
+
+      if 'autoupdater-enabled' in alias:
+        node.autoupdater-branch = alias['autoupdater-enabled']
+
   # list of macs
   # if options['gateway']:
   #   mark_gateways(options['gateway'])
