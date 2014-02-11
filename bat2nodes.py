@@ -69,10 +69,6 @@ if options['obscure']:
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 
-rrd = rrd(scriptdir +  "/nodedb/", options['destination_directory'] + "/nodes")
-rrd.update_database(db)
-rrd.update_images()
-
 m = D3MapBuilder(db)
 
 #Write nodes json
@@ -82,3 +78,7 @@ nodes_json.close()
 
 #Move to destination
 os.rename(options['destination_directory'] + '/nodes.json.new',options['destination_directory'] + '/nodes.json')
+
+rrd = rrd(scriptdir +  "/nodedb/", options['destination_directory'] + "/nodes")
+rrd.update_database(db)
+rrd.update_images()
