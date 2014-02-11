@@ -34,14 +34,14 @@ class rrd:
               ,'--step' , '60'
               # Number of nodes available
               ,'DS:nodes:GAUGE:120:0:U'
-              ,'RRA:LAST:0:1:120'
-              ,'RRA:LAST:0:60:744'
-              ,'RRA:LAST:0:1440:1780'
+              ,'RRA:AVERAGE:0.5:1:120'
+              ,'RRA:AVERAGE:0.5:60:744'
+              ,'RRA:AVERAGE:0.5:1440:1780'
               # Number of client available
               ,'DS:clients:GAUGE:120:0:U'
-              ,'RRA:LAST:0:1:120'
-              ,'RRA:LAST:0:60:744'
-              ,'RRA:LAST:0:1440:1780'
+              ,'RRA:AVERAGE:0.5:1:120'
+              ,'RRA:AVERAGE:0.5:60:744'
+              ,'RRA:AVERAGE:0.5:1440:1780'
               ]
       subprocess.call(args)
 
@@ -58,8 +58,8 @@ class rrd:
   def createGlobalGraph(self):
     nodeGraph = self.imagePath + "/" + "globalGraph.png"
     args = ["rrdtool", 'graph', nodeGraph, '-s', '-' + self.displayTimeGlobal, '-w', '800', '-h' '400'
-           ,'DEF:nodes=' + self.globalDbFile + ':nodes:LAST', 'LINE1:nodes#F00:nodes\\l'
-           ,'DEF:clients=' + self.globalDbFile + ':clients:LAST','LINE2:clients#00F:clients'
+           ,'DEF:nodes=' + self.globalDbFile + ':nodes:AVERAGE', 'LINE1:nodes#F00:nodes\\l'
+           ,'DEF:clients=' + self.globalDbFile + ':clients:AVERAGE','LINE2:clients#00F:clients'
            ]
     subprocess.check_output(args)
 
@@ -106,7 +106,7 @@ class rrd:
     nodeGraph = self.nodeMACToPNGFile(nodePrimaryMAC)
     nodeFile  = self.nodeMACToRRDFile(nodePrimaryMAC)
     args = ['rrdtool','graph', nodeGraph, '-s', '-' + self.displayTimeNode , '-w', '800', '-h', '400', '-l', '0', '-y', '1:1',
-            'DEF:clients=' + nodeFile + ':clients:LAST',
+            'DEF:clients=' + nodeFile + ':clients:AVERAGE',
             'VDEF:maxc=clients,MAXIMUM',
             'CDEF:c=0,clients,ADDNAN',
             'CDEF:d=clients,UN,maxc,UN,1,maxc,IF,*',
