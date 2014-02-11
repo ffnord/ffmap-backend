@@ -34,12 +34,12 @@ class rrd:
               ,'--step' , '60'
               # Number of nodes available
               ,'DS:nodes:GAUGE:120:0:U'
-              ,'RRA:LAST:0:1:44640'
+              ,'RRA:LAST:0:1:120'
               ,'RRA:LAST:0:60:744'
               ,'RRA:LAST:0:1440:1780'
               # Number of client available
               ,'DS:clients:GAUGE:120:0:U'
-              ,'RRA:LAST:0:1:44640'
+              ,'RRA:LAST:0:1:120'
               ,'RRA:LAST:0:60:744'
               ,'RRA:LAST:0:1440:1780'
               ]
