@@ -34,9 +34,6 @@ class rrd:
               ,'--step' , '60'
               # Number of nodes available
               ,'DS:nodes:GAUGE:120:0:U'
-              ,'RRA:AVERAGE:0.5:1:120'
-              ,'RRA:AVERAGE:0.5:60:744'
-              ,'RRA:AVERAGE:0.5:1440:1780'
               # Number of client available
               ,'DS:clients:GAUGE:120:0:U'
               ,'RRA:AVERAGE:0.5:1:120'
@@ -79,11 +76,6 @@ class rrd:
              ,'--start',str(round(self.currentTimeInt - 60))
              ,'--step' , '60'
              ,'DS:upstate:GAUGE:120:0:1'
-             ,'RRA:AVERAGE:0.5:1:120'
-             ,'RRA:AVERAGE:0.5:5:1440'
-             ,'RRA:AVERAGE:0.5:60:720'
-             ,'RRA:AVERAGE:0.5:720:730'
-             # Number of connected clients
              ,'DS:clients:GAUGE:120:0:200'
              ,'RRA:AVERAGE:0.5:1:120'
              ,'RRA:AVERAGE:0.5:5:1440'
