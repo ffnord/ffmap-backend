@@ -12,16 +12,11 @@ class alfred:
     alias = {}
     for mac,node in alfred_data.items():
       node_alias = {}
-      if 'location' in node:
-        try:
-          node_alias['gps'] = str(node['location']['latitude']) + ' ' + str(node['location']['longitude'])
-        except:
-          pass
+      for key in node:
+        node_alias[key] = node[key]
 
-      try:
-        node_alias['firmware'] = node['software']['firmware']['release']
-      except KeyError:
-        pass
+      if 'location' in node:
+        node_alias['geo'] = [node['location']['latitude'], node['location']['longitude']]
 
       try:
         node_alias['id'] = node['network']['mac']
@@ -30,8 +25,6 @@ class alfred:
 
       if 'hostname' in node:
         node_alias['name'] = node['hostname']
-      elif 'name' in node:
-        node_alias['name'] = node['name']
       if len(node_alias):
         alias[mac] = node_alias
     return alias

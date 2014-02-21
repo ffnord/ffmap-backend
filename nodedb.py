@@ -1,4 +1,3 @@
-import json
 from functools import reduce
 from collections import defaultdict
 from node import Node, Interface
@@ -17,6 +16,12 @@ class NodeDB:
   # fetch list of nodes
   def get_nodes(self):
     return self._nodes
+
+  def export(self):
+    return {
+      'nodes': [node.export() for node in self.get_nodes()],
+      'links': [link.export() for link in self.get_links()],
+    }
 
   def maybe_node_by_fuzzy_mac(self, mac):
     mac_a = mac.lower()
@@ -179,20 +184,11 @@ class NodeDB:
           node.add_mac(mac)
           self._nodes.append(node)
 
-      if 'name' in alias:
-        node.name = alias['name']
+      for key in alias:
+        node[key] = alias[key]
 
       if 'vpn' in alias and alias['vpn'] and mac and node.interfaces and mac in node.interfaces:
         node.interfaces[mac].vpn = True
-
-      if 'gps' in alias:
-        node.gps = alias['gps']
-
-      if 'firmware' in alias:
-        node.firmware = alias['firmware']
-
-      if 'id' in alias:
-        node.id = alias['id']
 
   # list of macs
   # if options['gateway']:

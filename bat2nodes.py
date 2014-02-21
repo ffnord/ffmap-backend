@@ -4,12 +4,13 @@ import json
 import fileinput
 import argparse
 import os
+import datetime
 
 from batman import batman
 from alfred import alfred
 from rrd import rrd
 from nodedb import NodeDB
-from d3mapbuilder import D3MapBuilder
+from json_encoder import CustomJSONEncoder
 
 # Force encoding to UTF-8
 import locale                                  # Ensures that subsequent open()s
@@ -71,11 +72,12 @@ if options['obscure']:
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 
-m = D3MapBuilder(db)
+exported = db.export()
+exported['meta'] = {'timestamp': datetime.datetime.utcnow().replace(microsecond=0).isoformat()}
 
 #Write nodes json
 nodes_json = open(options['destination_directory'] + '/nodes.json.new','w')
-nodes_json.write(m.build())
+json.dump(exported, nodes_json, cls=CustomJSONEncoder)
 nodes_json.close()
 
 #Move to destination

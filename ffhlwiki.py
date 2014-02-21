@@ -71,7 +71,7 @@ def import_wikigps(url):
       mac = data[0].strip()
 
       if data[1]:
-        alias['gps'] = data[1].strip()
+        alias['geo'] = [float(x) for x in data[1].strip().split(' ')]
 
       if data[2]:
         alias['name'] = data[2].strip()
