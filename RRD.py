@@ -80,9 +80,9 @@ class RRD:
             raise FileNotFoundError(self.filename)
         info = self.info()
         if set(ds_list) - set(info['ds'].values()) != set():
-            if set((ds.name, ds.type) for ds in ds_list) \
-             - set((ds.name, ds.type) for ds in info['ds'].values()) != set():
-                raise RRDIncompatibleException()
+            for ds in ds_list:
+                if ds.name in info['ds'] and ds.type != info['ds'][ds.name].type:
+                    raise RRDIncompatibleException("%s is %s but should be %s" % (ds.name, ds.type, info['ds'][ds.name].type))
             else:
                 raise RRDOutdatedException()
 
@@ -177,15 +177,8 @@ class RRD:
                 echo = True
         dump.stdout.close()
         restore.stdin.close()
-        try:
-            dump.wait(1)
-        except subprocess.TimeoutExpired:
-            dump.kill()
-        try:
-            restore.wait(2)
-        except subprocess.TimeoutExpired:
-            dump.kill()
-            raise RuntimeError("rrdtool restore process killed")
+        dump.wait()
+        restore.wait()
 
         os.rename(self.filename + ".new", self.filename)
         self._cached_info = None
