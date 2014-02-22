@@ -33,7 +33,9 @@ class rrd:
       if node.flags['online']:
         if not node.flags['client']:
           nodes[node.id] = node
-          node.clients = 0;
+          node.clients = 0
+          node.neighbors = 0
+          node.vpn_neighbors = 0
           if 'legacy' in node.flags and node.flags['legacy']:
             clientCount -= 1
         else:
@@ -45,6 +47,12 @@ class rrd:
         nodes[source].clients += 1
       elif target in nodes and not source in nodes:
         nodes[target].clients += 1
+      elif source in nodes and target in nodes:
+        nodes[source].neighbors += 1
+        nodes[target].neighbors += 1
+        if link.type == 'vpn':
+          nodes[target].vpn_neighbors += 1
+          nodes[source].vpn_neighbors += 1
 
     self.globalDb.update(len(nodes), clientCount)
     for node in nodes.values():

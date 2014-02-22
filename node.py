@@ -12,6 +12,7 @@ class NoneDict:
   __bool__ = lambda self: False
   __getitem__ = lambda self, k: NoneDict()
   __json__ = lambda self: None
+  __float__ = lambda self: float('NaN')
   def __setitem__(self, key, value):
     raise RuntimeError("NoneDict is readonly")
 

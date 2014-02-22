@@ -7,6 +7,19 @@ class NodeRRD(RRD):
     ds_list = [
         DS('upstate', 'GAUGE', 120, 0, 1),
         DS('clients', 'GAUGE', 120, 0, float('NaN')),
+        DS('neighbors', 'GAUGE', 120, 0, float('NaN')),
+        DS('vpn_neighbors', 'GAUGE', 120, 0, float('NaN')),
+        DS('loadavg', 'GAUGE', 120, 0, float('NaN')),
+        DS('rx_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('rx_packets', 'DERIVE', 120, 0, float('NaN')),
+        DS('tx_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('tx_packets', 'DERIVE', 120, 0, float('NaN')),
+        DS('mgmt_rx_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('mgmt_rx_packets', 'DERIVE', 120, 0, float('NaN')),
+        DS('mgmt_tx_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('mgmt_tx_packets', 'DERIVE', 120, 0, float('NaN')),
+        DS('forward_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('forward_packets', 'DERIVE', 120, 0, float('NaN')),
     ]
     rra_list = [
         RRA('AVERAGE', 0.5, 1, 120),    #  2 hours of  1 minute samples
@@ -30,7 +43,23 @@ class NodeRRD(RRD):
         return os.path.basename(self.filename).rsplit('.', 2)[0] + ".png"
 
     def update(self):
-        super().update({'upstate': 1, 'clients': self.node.clients})
+        values = {
+            'upstate': 1,
+            'clients': float(self.node.clients),
+            'neighbors': float(self.node.neighbors),
+            'vpn_neighbors': float(self.node.vpn_neighbors),
+            'loadavg': float(self.node.statistics['loadavg']),
+        }
+        for item in ('rx', 'tx', 'mgmt_rx', 'mgmt_tx', 'forward'):
+            try:
+                values['%s_bytes' % item] = int(self.node.statistics['traffic'][item]['bytes'])
+            except TypeError:
+                pass
+            try:
+                values['%s_packets' % item] = int(self.node.statistics['traffic'][item]['packets'])
+            except TypeError:
+                pass
+        super().update(values)
 
     def graph(self, directory, timeframe):
         """
