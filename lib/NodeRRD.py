@@ -8,25 +8,35 @@ class NodeRRD(RRD):
     ds_list = [
         DS('upstate', 'GAUGE', 120, 0, 1),
         DS('clients', 'GAUGE', 120, 0, float('NaN')),
+        DS('neighbors', 'GAUGE', 120, 0, float('NaN')),
+        DS('vpn_neighbors', 'GAUGE', 120, 0, float('NaN')),
+        DS('loadavg', 'GAUGE', 120, 0, float('NaN')),
+        DS('rx_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('rx_packets', 'DERIVE', 120, 0, float('NaN')),
+        DS('tx_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('tx_packets', 'DERIVE', 120, 0, float('NaN')),
+        DS('mgmt_rx_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('mgmt_rx_packets', 'DERIVE', 120, 0, float('NaN')),
+        DS('mgmt_tx_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('mgmt_tx_packets', 'DERIVE', 120, 0, float('NaN')),
+        DS('forward_bytes', 'DERIVE', 120, 0, float('NaN')),
+        DS('forward_packets', 'DERIVE', 120, 0, float('NaN')),
     ]
     rra_list = [
         # 2 hours of  1 minute samples
         RRA('AVERAGE', 0.5, 1, 120),
-        #  5 days  of  5 minute samples
-        RRA('AVERAGE', 0.5, 5, 1440),
-        # 30 days  of  1 hour   samples
-        RRA('AVERAGE', 0.5, 60, 720),
-        #  1 year  of 12 hour   samples
-        RRA('AVERAGE', 0.5, 720, 730),
+        # 7 days  of  15 minute samples
+        RRA('AVERAGE', 0.5, 15, 672),
     ]
 
-    def __init__(self, filename, node=None):
+    def __init__(self, filename, node=None, graph=None):
         """
         Create a new RRD for a given node.
 
         If the RRD isn't supposed to be updated, the node can be omitted.
         """
         self.node = node
+        self.node_graph = graph
         super().__init__(filename)
         self.ensure_sanity(self.ds_list, self.rra_list, step=60)
 
@@ -37,8 +47,28 @@ class NodeRRD(RRD):
 
     # TODO: fix this, python does not support function overloading
     def update(self):
-        super().update({'upstate': int(self.node['flags']['online']),
-                        'clients': self.node['statistics']['clients']})
+        values = {
+            'upstate': int(self.node['flags']['online']),
+            'clients': float(self.node['statistics']['clients']),
+            'loadavg': float(self.node['statistics'].get('loadavg', 0)),
+        }
+        for item in ('rx', 'tx', 'mgmt_rx', 'mgmt_tx', 'forward'):
+            try:
+                values.update({
+                    ('%s_bytes' % item): int(self.node['statistics'].get('traffic', {}).get(item, {}).get('bytes', 0)),
+                    ('%s_packets' % item): int(self.node['statistics'].get('traffic', {}).get(item, {}).get('packets', 0)),
+                })
+            except TypeError:
+                pass
+        try:
+            graph_node = next(key for key, node in self.node_graph.nodes(data=True) if node.get('node_id') == self.node['nodeinfo']['node_id'])
+            values.update({
+                'neighbors': float(len(self.node_graph[graph_node])),
+                'vpn_neighbors': float(len(list(filter(lambda edge: edge.get('vpn', False), self.node_graph[graph_node].values())))),
+            })
+        except StopIteration:
+            pass
+        super().update(values)
 
     def graph(self, directory, timeframe):
         """

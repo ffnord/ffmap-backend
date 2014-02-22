@@ -154,7 +154,7 @@ def main(params):
         script_directory = os.path.dirname(os.path.realpath(__file__))
         rrd = RRD(os.path.join(script_directory, 'nodedb'),
                   os.path.join(params['dest_dir'], 'nodes'))
-        rrd.update_database(nodedb['nodes'])
+        rrd.update_database(nodedb['nodes'], batadv_graph)
         rrd.update_images()
 
 

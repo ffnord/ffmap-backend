@@ -27,7 +27,7 @@ class RRD(object):
         except OSError:
             os.mkdir(self.imagePath)
 
-    def update_database(self, nodes):
+    def update_database(self, nodes, graph):
         online_nodes = dict(filter(
             lambda d: d[1]['flags']['online'], nodes.items()))
         client_count = sum(map(
@@ -35,7 +35,7 @@ class RRD(object):
 
         self.globalDb.update(len(online_nodes), client_count)
         for node_id, node in online_nodes.items():
-            rrd = NodeRRD(os.path.join(self.dbPath, node_id + '.rrd'), node)
+            rrd = NodeRRD(os.path.join(self.dbPath, node_id + '.rrd'), node, graph)
             rrd.update()
 
     def update_images(self):
