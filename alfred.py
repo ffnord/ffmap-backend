@@ -15,8 +15,10 @@ class alfred:
       for key in node:
         node_alias[key] = node[key]
 
-      if 'location' in node:
+      try:
         node_alias['geo'] = [node['location']['latitude'], node['location']['longitude']]
+      except (TypeError, KeyError):
+        pass
 
       try:
         node_alias['id'] = node['network']['mac']
