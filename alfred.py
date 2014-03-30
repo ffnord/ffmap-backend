@@ -13,7 +13,10 @@ class alfred:
     for mac,node in alfred_data.items():
       node_alias = {}
       if 'location' in node:
-        node_alias['gps'] = str(node['location']['latitude']) + ' ' + str(node['location']['longitude'])
+        try:
+          node_alias['gps'] = str(node['location']['latitude']) + ' ' + str(node['location']['longitude'])
+        except:
+          pass
 
       try:
         node_alias['firmware'] = node['software']['firmware']['release']
