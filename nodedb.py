@@ -218,6 +218,25 @@ class NodeDB:
 
           link.type = "vpn"
 
+  def count_clients(self):
+    for link in self._links:
+      try:
+        a = self.maybe_node_by_id(link.source.interface)
+        b = self.maybe_node_by_id(link.target.interface)
+
+        if a.flags['client']:
+          client = a
+          node = b
+        elif b.flags['client']:
+          client = b
+          node = a
+        else:
+          continue
+
+        node.clientcount += 1
+      except:
+        pass
+
   def obscure_clients(self):
 
     globalIdCounter = 0
