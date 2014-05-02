@@ -169,12 +169,15 @@ class NodeDB:
   def import_aliases(self, aliases):
     for mac, alias in aliases.items():
       try:
-        node = self.maybe_node_by_fuzzy_mac(mac)
+        node = self.maybe_node_by_mac([mac])
       except:
-        # create an offline node
-        node = Node()
-        node.add_mac(mac)
-        self._nodes.append(node)
+        try:
+          node = self.maybe_node_by_fuzzy_mac(mac)
+        except:
+          # create an offline node
+          node = Node()
+          node.add_mac(mac)
+          self._nodes.append(node)
 
       if 'name' in alias:
         node.name = alias['name']
