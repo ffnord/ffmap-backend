@@ -38,5 +38,5 @@ class alfred:
 
 if __name__ == "__main__":
   ad = alfred()
-  al = ad.alias()
+  al = ad.aliases()
   print(al)

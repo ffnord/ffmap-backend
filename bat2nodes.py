@@ -49,7 +49,7 @@ if options['mesh']:
     bm = batman(mesh_interface)
     db.parse_vis_data(bm.vis_data(options['alfred']))
     for gw in bm.gateway_list():
-      db.mark_gateways(gw.mac)
+      db.mark_gateways(gw['mac'])
 else:
   bm = batman()
   db.parse_vis_data(bm.vis_data(options['alfred']))

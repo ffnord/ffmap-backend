@@ -182,7 +182,7 @@ class NodeDB:
       if 'name' in alias:
         node.name = alias['name']
 
-      if 'vpn' in alias and alias['vpn']:
+      if 'vpn' in alias and alias['vpn'] and mac and node.interfaces and mac in node.interfaces:
         node.interfaces[mac].vpn = True
 
       if 'gps' in alias:
@@ -202,6 +202,7 @@ class NodeDB:
       try:
         node = self.maybe_node_by_mac((gateway, ))
       except:
+        print("WARNING: did not find gateway '",gateway,"' in node list")
         continue
 
       node.flags['gateway'] = True
