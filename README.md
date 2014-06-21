@@ -1,4 +1,4 @@
-ffmap-backend - Data for Freifunk Map
+# Data for Freifunk Map, Graph and Node List
 
 ffmap-backend gathers information on the batman network by invoking 
    batctl
@@ -48,4 +48,6 @@ the script. If those are not available, an error will occurr if not executed as 
 the tool realpath optionally allows to execute the script from anywhere in the directory tree.
 
 For the script's regular execution add the following to the crontab:
+<pre>
 */5 * * * * /home/ffmap/ffmap-backend/mkmap.sh /home/ffmap/www
+</pre>
