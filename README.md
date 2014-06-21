@@ -14,16 +14,18 @@ When executed without root privileges, we suggest to grant sudo permissions
 within wrappers of those binaries, so no further changes are required in other
 scripts:
 
+<pre>
 $ cat <<EOCAT > $HOME/batctl
 #!/bin/sh
 exec sudo /usr/sbin/batctl $*
 EOCAT
+</pre>
 
 and analogously for batadv-vis. The entry for /etc/sudoers could be
 whateveruser   ALL=(ALL:ALL) NOPASSWD: /usr/sbin/batctl,/usr/sbin/batadv-vis,/usr/sbin/alfred-json
 
 The destination directory can be made directly available through apache:
-
+<pre>
 $ cat /etc/apache2/site-enabled/000-default
 ...
         <Directory /home/whateverusername/www/>
@@ -37,3 +39,13 @@ $ cat /etc/apache2/site-enabled/000-default
 $ cat /etc/apache2/conf.d/freifunk
 Alias /map /home/ffmap/www/
 Alias /firmware /home/freifunk/autoupdates/
+</pre>
+
+To execute, run 
+ ./mkmap.sh ../www
+The script expects above described sudo-wrappers in the $HOME directory of the user executing
+the script. If those are not available, an error will occurr if not executed as root. Also,
+the tool realpath optionally allows to execute the script from anywhere in the directory tree.
+
+For the script's regular execution add the following to the crontab:
+*/5 * * * * /home/ffmap/ffmap-backend/mkmap.sh /home/ffmap/www
