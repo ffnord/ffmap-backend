@@ -4,6 +4,7 @@ import json
 import fileinput
 import argparse
 import os
+import time
 
 from batman import batman
 from alfred import alfred
@@ -43,7 +44,8 @@ args = parser.parse_args()
 
 options = vars(args)
 
-db = NodeDB()
+db = NodeDB(int(time.time()))
+
 if options['mesh']:
   for mesh_interface in options['mesh']:
     bm = batman(mesh_interface)
@@ -68,6 +70,13 @@ db.count_clients()
 
 if options['obscure']:
   db.obscure_clients()
+
+db.load_state("state.json")
+
+# remove nodes that have been offline for more than 30 days
+db.prune_offline(time.time() - 30*86400)
+
+db.dump_state("state.json")
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 

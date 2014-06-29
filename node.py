@@ -12,6 +12,7 @@ class Node():
     self.gps = None
     self.firmware = None
     self.clientcount = 0
+    self.lastseen = 0
 
   def add_mac(self, mac):
     mac = mac.lower()

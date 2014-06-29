@@ -5,7 +5,8 @@ from node import Node, Interface
 from link import Link, LinkConnector
 
 class NodeDB:
-  def __init__(self):
+  def __init__(self, time=0):
+    self.time = time
     self._nodes = []
     self._links = []
 
@@ -17,6 +18,46 @@ class NodeDB:
   # fetch list of nodes
   def get_nodes(self):
     return self._nodes
+
+  # remove all offlines nodes with lastseen < timestamp
+  def prune_offline(self, timestamp):
+    self._nodes = list(filter(lambda x: x.lastseen >= timestamp, self._nodes))
+
+  # write persistent state to file
+  def dump_state(self, filename):
+    obj = []
+
+    for node in self._nodes:
+      if node.flags['client']:
+        continue
+
+      obj.append({ 'id': node.id
+                 , 'name': node.name
+                 , 'lastseen': node.lastseen
+                 , 'geo': node.gps
+                 })
+
+    with open(filename, "w") as f:
+      json.dump(obj, f)
+
+  # load persistent state from file
+  def load_state(self, filename):
+    try:
+      with open(filename, "r") as f:
+        obj = json.load(f)
+        for n in obj:
+          try:
+            node = self.maybe_node_by_id(n['id'])
+          except:
+            node = Node()
+            node.id = n['id']
+            node.name = n['name']
+            node.lastseen = n['lastseen']
+            node.gps = n['geo']
+            self._nodes.append(node)
+
+    except:
+      pass
 
   def maybe_node_by_fuzzy_mac(self, mac):
     mac_a = mac.lower()
@@ -51,6 +92,7 @@ class NodeDB:
           node = self.maybe_node_by_mac((x['of'], x['secondary']))
         except:
           node = Node()
+          node.lastseen = self.time
           node.flags['online'] = True
           if 'legacy' in x:
             node.flags['legacy'] = True
@@ -66,6 +108,7 @@ class NodeDB:
           node = self.maybe_node_by_mac((x['router'], ))
         except:
           node = Node()
+          node.lastseen = self.time
           node.flags['online'] = True
           if 'legacy' in x:
             node.flags['legacy'] = True
@@ -95,6 +138,7 @@ class NodeDB:
           node = self.maybe_node_by_mac((x['neighbor'], ))
         except:
           node = Node()
+          node.lastseen = self.time
           node.flags['online'] = True
           if x['label'] == 'TT':
             node.flags['client'] = True
