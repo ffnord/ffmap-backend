@@ -7,7 +7,7 @@ class alfred:
     self.request_data_type = request_data_type
 
   def aliases(self):
-    output = subprocess.check_output(["alfred-json","-r",str(self.request_data_type),"-f","json"])
+    output = subprocess.check_output(["alfred-json","-r",str(self.request_data_type),"-f","json","-z"])
     alfred_data = json.loads(output.decode("utf-8"))
     alias = {}
     for mac,node in alfred_data.items():
