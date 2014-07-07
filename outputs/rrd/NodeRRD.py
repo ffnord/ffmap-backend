@@ -1,7 +1,7 @@
 import os
 import subprocess
 from node import Node
-from RRD import RRD, DS, RRA
+from .RRD import RRD, DS, RRA
 
 class NodeRRD(RRD):
     ds_list = [
@@ -45,18 +45,18 @@ class NodeRRD(RRD):
     def update(self):
         values = {
             'upstate': 1,
-            'clients': float(self.node.clients),
-            'neighbors': float(self.node.neighbors),
-            'vpn_neighbors': float(self.node.vpn_neighbors),
-            'loadavg': float(self.node.statistics['loadavg']),
+            'clients': float(len(self.node.get('clients', []))),
+            'neighbors': float(len(self.node.get('neighbors', []))),
+            'vpn_neighbors': float(len(self.node.vpn_neighbors)),
+            'loadavg': float(self.node['statistics']['loadavg']),
         }
         for item in ('rx', 'tx', 'mgmt_rx', 'mgmt_tx', 'forward'):
             try:
-                values['%s_bytes' % item] = int(self.node.statistics['traffic'][item]['bytes'])
+                values[item + '_bytes'] = int(self.node['statistics']['traffic'][item]['bytes'])
             except TypeError:
                 pass
             try:
-                values['%s_packets' % item] = int(self.node.statistics['traffic'][item]['packets'])
+                values[item + '_packets'] = int(self.node['statistics']['traffic'][item]['packets'])
             except TypeError:
                 pass
         super().update(values)

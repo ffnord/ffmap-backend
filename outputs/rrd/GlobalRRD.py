@@ -1,6 +1,6 @@
 import os
 import subprocess
-from RRD import RRD, DS, RRA
+from .RRD import RRD, DS, RRA
 
 class GlobalRRD(RRD):
     ds_list = [
@@ -15,8 +15,8 @@ class GlobalRRD(RRD):
         RRA('AVERAGE', 0.5, 1440, 1780),# ~5 years of 1 day    samples
     ]
 
-    def __init__(self, directory):
-        super().__init__(os.path.join(directory, "nodes.rrd"))
+    def __init__(self, filepath):
+        super().__init__(filepath)
         self.ensureSanity(self.ds_list, self.rra_list, step=60)
 
     def update(self, nodeCount, clientCount):
