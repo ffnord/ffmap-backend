@@ -1,6 +1,6 @@
-from node import Node
+from .node import Node
 
-class AmbiguityException(Exception):
+class AmbiguityError(Exception):
     """Indicate the ambiguity of identifiers.
 
     This exception is raised if there is more than one match for a set
@@ -43,7 +43,7 @@ class NodeDB(dict):
                 continue
             if id_ in self:
                 if node is not None:
-                    raise AmbiguityException([node_id, id_])
+                    raise AmbiguityError([node_id, id_])
                 node = self[id_]
                 node_id = id_
 
@@ -53,7 +53,7 @@ class NodeDB(dict):
 
         # Update the node with the given properties using its own update method.
         if other is not None:
-            node.update(other)
+            node.deep_update(other)
 
         # Add new aliases if any
         for id_ in ids:

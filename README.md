@@ -1,6 +1,6 @@
 # Data for Freifunk Map, Graph and Node List
 
-ffmap-backend gathers information on the batman network by invoking 
+ffmap-backend gathers information on the batman network by invoking
    batctl
 and
    batadv-vis
@@ -41,13 +41,13 @@ Alias /map /home/ffmap/www/
 Alias /firmware /home/freifunk/autoupdates/
 </pre>
 
-To execute, run 
- ./mkmap.sh ../www
+To execute, run
+ python3 -mffmap.run --input-alfred --input-badadv --output-d3json ../www/nodes.json
 The script expects above described sudo-wrappers in the $HOME directory of the user executing
 the script. If those are not available, an error will occurr if not executed as root. Also,
 the tool realpath optionally allows to execute the script from anywhere in the directory tree.
 
 For the script's regular execution add the following to the crontab:
 <pre>
-*/5 * * * * /home/ffmap/ffmap-backend/mkmap.sh /home/ffmap/www
+*/5 * * * * python3 -mffmap.run --input-alfred --input-badadv --output-d3json /home/ffmap/www/nodes.json
 </pre>

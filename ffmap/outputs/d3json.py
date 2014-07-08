@@ -1,11 +1,12 @@
 import json
+from datetime import datetime
 
 __all__ = ["Exporter"]
 
 class CustomJSONEncoder(json.JSONEncoder):
     """
-    JSON encoder that uses an object's __json__() method to convert it to
-    something JSON-compatible.
+    JSON encoder that uses an object's __json__() method to convert it
+    to something JSON-compatible.
     """
     def default(self, obj):
         try:
@@ -14,7 +15,7 @@ class CustomJSONEncoder(json.JSONEncoder):
             pass
         return super().default(obj)
 
-class Exporter:
+class Output:
     def __init__(self, filepath="nodes.json"):
         self.filepath = filepath
 
@@ -60,9 +61,14 @@ class Exporter:
         return {
             "nodes": nodes,
             "links": links,
+            "meta": {
+                "timestamp": datetime.utcnow()
+                                     .replace(microsecond=0)
+                                     .isoformat()
+            }
         }
 
-    def export(self, nodedb):
+    def output(self, nodedb):
         with open(self.filepath, "w") as nodes_json:
             json.dump(
                 self.generate(nodedb),

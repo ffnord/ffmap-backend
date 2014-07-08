@@ -7,11 +7,20 @@ class NoneDict:
     even previously inexistent keys can be accessed, but nothing is
     stored permanently in this class.
     """
-    __repr__ = lambda self: 'NoneDict()'
-    __bool__ = lambda self: False
-    __getitem__ = lambda self, k: NoneDict()
-    __json__ = lambda self: None
-    __float__ = lambda self: float('NaN')
+    def __repr__(self):
+        return 'NoneDict()'
+    def __bool__(self):
+        return False
+    def __getitem__(self, k):
+        return NoneDict()
+    def __json__(self):
+        return None
+    def __float__(self):
+        return float('NaN')
+    def __iter__(self):
+        # empty generator
+        return
+        yield
     def __setitem__(self, key, value):
         raise RuntimeError("NoneDict is readonly")
 
@@ -38,6 +47,16 @@ class Node(defaultdict):
         At least the id cannot change after initialization...
         """
         return hash(self.id)
+
+    def deep_update(self, other):
+        """Update the dictionary like dict.update() but recursively."""
+        def dmerge(a, b):
+            for k, v in b.items():
+                if isinstance(v, dict) and isinstance(a.get(k), dict):
+                    dmerge(a[k], v)
+                else:
+                    a[k] = v
+        dmerge(self, other)
 
     @property
     def vpn_neighbors(self):

@@ -1,8 +1,7 @@
 import os
-from .NodeRRD import NodeRRD
-from .GlobalRRD import GlobalRRD
+from ffmap.rrd.rrds import NodeRRD, GlobalRRD
 
-class Exporter:
+class Output:
     def __init__(self, directory="nodedb"):
         self.directory = directory
         try:
@@ -10,7 +9,7 @@ class Exporter:
         except OSError:
             pass
 
-    def export(self, nodedb):
+    def output(self, nodedb):
         nodes = set(nodedb.values())
         clients = 0
         nodecount = 0
