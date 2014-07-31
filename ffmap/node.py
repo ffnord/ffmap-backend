@@ -86,4 +86,6 @@ class Node(defaultdict):
                     else:
                         new_neighbor[key] = val
                 ret["neighbors"].append(new_neighbor)
+        if "id" not in ret:
+            ret["id"] = self.id
         return ret

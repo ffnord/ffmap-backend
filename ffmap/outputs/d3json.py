@@ -25,42 +25,55 @@ class Output:
         nodes = []
         count = 0
         for node in set(nodedb.values()):
-            nodes.append(node.export())
+            node_export = node.export()
+            node_export["flags"] = {
+                "gateway": "vpn" in node and node["vpn"],
+                "client": False,
+                "online": True
+            }
+            nodes.append(node_export)
             indexes[node.id] = count
             count += 1
 
-        links = []
+        links = {}
         for node in set(nodedb.values()):
-            if "neighbors" in node:
-                links.extend(
-                    {
+            for neighbor in node.get("neighbors", []):
+                key = (neighbor["neighbor"].id, node.id)
+                rkey = tuple(reversed(key))
+                if rkey in links:
+                    links[rkey]["quality"] += ","+neighbor["metric"]
+                else:
+                    links[key] = {
                         "source": indexes[node.id],
                         "target": indexes[neighbor["neighbor"].id],
                         "quality": neighbor["metric"],
-                        "type": "vpn" if neighbor["neighbor"]["vpn"] else None,
+                        "type": "vpn" if neighbor["neighbor"]["vpn"] or node["vpn"] else None,
                         "id": "-".join((node.id, neighbor["neighbor"].id)),
-                    } for neighbor in node["neighbors"]
-                )
-            if "clients" in node:
-                for client in node["clients"]:
-                    if not client in indexes:
-                        nodes.append({
-                            "id": client,
-                        })
-                        indexes[client] = count
-                        count += 1
-
-                    links.append({
-                        "source": indexes[node.id],
-                        "target": indexes[client],
-                        "quality": "TT",
-                        "type": "client",
-                        "id": "-".join((node.id, client)),
+                    }
+            for client in node.get("clients", []):
+                if not client in indexes:
+                    nodes.append({
+                        "id": client,
+                        "flags": {
+                            "client": True,
+                            "online": True,
+                            "gateway": False
+                        }
                     })
+                    indexes[client] = count
+                    count += 1
+
+                links[(node.id, client)] = {
+                    "source": indexes[node.id],
+                    "target": indexes[client],
+                    "quality": "TT",
+                    "type": "client",
+                    "id": "-".join((node.id, client)),
+                }
 
         return {
             "nodes": nodes,
-            "links": links,
+            "links": list(links.values()),
             "meta": {
                 "timestamp": datetime.utcnow()
                                      .replace(microsecond=0)
