@@ -59,6 +59,16 @@ class NodeDB:
     except:
       pass
 
+  def maybe_node_by_fuzzy_mac(self, mac):
+    mac_a = mac.lower()
+
+    for node in self._nodes:
+      for mac_b in node.macs:
+        if is_derived_mac(mac_a, mac_b):
+          return node
+
+    raise KeyError
+
   def maybe_node_by_mac(self, macs):
     for node in self._nodes:
       for mac in macs:
@@ -105,8 +115,11 @@ class NodeDB:
           node.add_mac(x['router'])
           self._nodes.append(node)
 
+        # If it's a TT link and the MAC is very similar
+        # consider this MAC as one of the routers
+        # MACs
         if 'gateway' in x and x['label'] == "TT":
-          if x['router'] in node.macs:
+          if is_similar(x['router'], x['gateway']):
             node.add_mac(x['gateway'])
 
             # skip processing as regular link
@@ -203,7 +216,7 @@ class NodeDB:
         node = self.maybe_node_by_mac([mac])
       except:
         try:
-          node = self.maybe_node_mac(mac)
+          node = self.maybe_node_by_fuzzy_mac(mac)
         except:
           # create an offline node
           node = Node()
@@ -291,8 +304,8 @@ class NodeDB:
       idt = link.target.interface
 
       try:
-        node_source = self.maybe_node_by_mac(ids)
-        node_target = self.maybe_node_by_mac(idt)
+        node_source = self.maybe_node_by_fuzzy_mac(ids)
+        node_target = self.maybe_node_by_id(idt)
 
         if not node_source.flags['client'] and not node_target.flags['client']:
           # if none of the nodes associated with this link are clients,
@@ -341,3 +354,76 @@ def generateId(nodeId,nodeCounters):
     n = 0
 
   return nodeId + "_" + str(n)
+
+# compares two MACs and decides whether they are
+# similar and could be from the same node
+def is_similar(a, b):
+  if a == b:
+    return True
+
+  try:
+    mac_a = list(int(i, 16) for i in a.split(":"))
+    mac_b = list(int(i, 16) for i in b.split(":"))
+  except ValueError:
+    return False
+
+  # first byte must only differ in bit 2
+  if mac_a[0] | 2 == mac_b[0] | 2:
+    # count different bytes
+    c = [x for x in zip(mac_a[1:], mac_b[1:]) if x[0] != x[1]]
+  else:
+    return False
+
+  # no more than two additional bytes must differ
+  if len(c) <= 2:
+    delta = 0
+
+  if len(c) > 0:
+    delta = sum(abs(i[0] -i[1]) for i in c)
+
+  # These addresses look pretty similar!
+  return delta < 8
+
+def is_derived_mac(a, b):
+  if a == b:
+    return True
+
+  try:
+    mac_a = list(int(i, 16) for i in a.split(":"))
+    mac_b = list(int(i, 16) for i in b.split(":"))
+  except ValueError:
+    return False
+
+  if mac_a[4] != mac_b[4] or mac_a[2] != mac_b[2] or mac_a[1] != mac_b[1]:
+    return False
+
+  x = list(mac_a)
+  x[5] += 1
+  x[5] %= 255
+  if mac_b == x:
+    return True
+
+  x[0] |= 2
+  if mac_b == x:
+    return True
+
+  x[3] += 1
+  x[3] %= 255
+  if mac_b == x:
+    return True
+
+  x = list(mac_a)
+  x[0] |= 2
+  x[5] += 2
+  x[5] %= 255
+  if mac_b == x:
+    return True
+
+  x = list(mac_a)
+  x[0] |= 2
+  x[3] += 1
+  x[3] %= 255
+  if mac_b == x:
+    return True
+
+  return False
