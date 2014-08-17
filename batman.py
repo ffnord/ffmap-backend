@@ -31,8 +31,6 @@ class batman:
     output = subprocess.check_output(["batctl","-m",self.mesh_interface,"vd","json","-n"])
     lines = output.splitlines()
     vds = self.vis_data_helper(lines)
-    for vd in vds:
-      vd['legacy'] = True
     return vds
 
   def vis_data_batadv_vis(self):
