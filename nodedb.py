@@ -28,9 +28,6 @@ class NodeDB:
     obj = []
 
     for node in self._nodes:
-      if node.flags['client']:
-        continue
-
       obj.append({ 'id': node.id
                  , 'name': node.name
                  , 'lastseen': node.lastseen
@@ -102,8 +99,11 @@ class NodeDB:
         node.add_mac(x['secondary'])
 
     for x in vis_data:
-
       if 'router' in x:
+        # TTs will be processed later
+        if x['label'] == "TT":
+          continue
+
         try:
           node = self.maybe_node_by_mac((x['router'], ))
         except:
@@ -114,16 +114,6 @@ class NodeDB:
             node.flags['legacy'] = True
           node.add_mac(x['router'])
           self._nodes.append(node)
-
-        # If it's a TT link and the MAC is very similar
-        # consider this MAC as one of the routers
-        # MACs
-        if 'gateway' in x and x['label'] == "TT":
-          if is_similar(x['router'], x['gateway']):
-            node.add_mac(x['gateway'])
-
-            # skip processing as regular link
-            continue
 
         try:
           if 'neighbor' in x:
@@ -140,15 +130,15 @@ class NodeDB:
           node = Node()
           node.lastseen = self.time
           node.flags['online'] = True
-          if x['label'] == 'TT':
-            node.flags['client'] = True
-
           node.add_mac(x['neighbor'])
           self._nodes.append(node)
 
     for x in vis_data:
-
       if 'router' in x:
+        # TTs will be processed later
+        if x['label'] == "TT":
+          continue
+
         try:
           if 'gateway' in x:
             x['neighbor'] = x['gateway']
@@ -172,13 +162,9 @@ class NodeDB:
         link.quality = x['label']
         link.id = "-".join(sorted((link.source.interface, link.target.interface)))
 
-        if x['label'] == "TT":
-          link.type = "client"
-
         self._links.append(link)
 
     for x in vis_data:
-
       if 'primary' in x:
         try:
           node = self.maybe_node_by_mac((x['primary'], ))
@@ -186,6 +172,16 @@ class NodeDB:
           continue
 
         node.id = x['primary']
+
+    for x in vis_data:
+      if 'router' in x and x['label'] == 'TT':
+        try:
+          node = self.maybe_node_by_mac((x['router'], ))
+          node.add_mac(x['gateway'])
+          if not is_similar(x['router'], x['gateway']):
+            node.clientcount += 1
+        except:
+          pass
 
   def reduce_links(self):
     tmp_links = defaultdict(list)
@@ -256,9 +252,6 @@ class NodeDB:
     while changes > 0:
       changes = 0
       for link in self._links:
-        if link.type == "client":
-          continue
-
         source_interface = self._nodes[link.source.id].interfaces[link.source.interface]
         target_interface = self._nodes[link.target.id].interfaces[link.target.interface]
         if source_interface.vpn or target_interface.vpn:
@@ -268,92 +261,6 @@ class NodeDB:
             changes += 1
 
           link.type = "vpn"
-
-  def count_clients(self):
-    for link in self._links:
-      try:
-        a = self.maybe_node_by_id(link.source.interface)
-        b = self.maybe_node_by_id(link.target.interface)
-
-        if a.flags['client']:
-          client = a
-          node = b
-        elif b.flags['client']:
-          client = b
-          node = a
-        else:
-          continue
-
-        node.clientcount += 1
-      except:
-        pass
-
-  def obscure_clients(self):
-
-    globalIdCounter = 0
-    nodeCounters = {}
-    clientIds = {}
-
-    for node in self._nodes:
-      if node.flags['client']:
-        node.macs = set()
-        clientIds[node.id] = None
-
-    for link in self._links:
-      ids = link.source.interface
-      idt = link.target.interface
-
-      try:
-        node_source = self.maybe_node_by_fuzzy_mac(ids)
-        node_target = self.maybe_node_by_id(idt)
-
-        if not node_source.flags['client'] and not node_target.flags['client']:
-          # if none of the nodes associated with this link are clients,
-          # we do not want to obscure
-          continue
-
-        if ids in clientIds and idt in clientIds:
-          # This is for corner cases, when a client
-          # is linked to another client.
-          clientIds[ids] = str(globalIdCounter)
-          ids = str(globalIdCounter)
-          globalIdCounter += 1
-
-          clientIds[idt] = str(globalIdCounter)
-          idt = str(globalIdCounter)
-          globalIdCounter += 1
-
-        elif ids in clientIds:
-          newId = generateId(idt)
-          clientIds[ids] = newId
-          ids = newId
-
-          link.source.interface = ids;
-          node_source.id = ids;
-
-        elif idt in clientIds:
-          newId = generateId(ids,nodeCounters)
-          clientIds[idt] = newId
-          idt = newId
-
-          link.target.interface = idt;
-          node_target.id = idt;
-
-        link.id = ids + "-" + idt
-
-      except KeyError:
-        pass
-
-# extends node id by incremented node counter
-def generateId(nodeId,nodeCounters):
-  if nodeId in nodeCounters:
-    n = nodeCounters[nodeId]
-    nodeCounters[nodeId] = n + 1
-  else:
-    nodeCounters[nodeId] = 1
-    n = 0
-
-  return nodeId + "_" + str(n)
 
 # compares two MACs and decides whether they are
 # similar and could be from the same node

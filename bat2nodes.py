@@ -31,9 +31,6 @@ parser.add_argument('-a', '--aliases',
 parser.add_argument('-m', '--mesh', action='append',
                   help='batman mesh interface')
 
-parser.add_argument('-o', '--obscure', action='store_true',
-                  help='obscure client macs')
-
 parser.add_argument('-A', '--alfred', action='store_true',
                   help='retrieve aliases from alfred')
 
@@ -65,11 +62,6 @@ if options['aliases']:
 if options['alfred']:
   af = alfred()
   db.import_aliases(af.aliases())
-
-db.count_clients()
-
-if options['obscure']:
-  db.obscure_clients()
 
 db.load_state("state.json")
 

@@ -7,7 +7,6 @@ class Node():
     self.flags = dict({
       "online": False,
       "gateway": False,
-      "client": False
     })
     self.gps = None
     self.firmware = None
