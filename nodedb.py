@@ -56,16 +56,6 @@ class NodeDB:
     except:
       pass
 
-  def maybe_node_by_fuzzy_mac(self, mac):
-    mac_a = mac.lower()
-
-    for node in self._nodes:
-      for mac_b in node.macs:
-        if is_derived_mac(mac_a, mac_b):
-          return node
-
-    raise KeyError
-
   def maybe_node_by_mac(self, macs):
     for node in self._nodes:
       for mac in macs:
@@ -207,13 +197,10 @@ class NodeDB:
       try:
         node = self.maybe_node_by_mac([mac])
       except:
-        try:
-          node = self.maybe_node_by_fuzzy_mac(mac)
-        except:
-          # create an offline node
-          node = Node()
-          node.add_mac(mac)
-          self._nodes.append(node)
+        # create an offline node
+        node = Node()
+        node.add_mac(mac)
+        self._nodes.append(node)
 
       if 'name' in alias:
         node.name = alias['name']
