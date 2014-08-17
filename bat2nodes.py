@@ -8,7 +8,7 @@ import time
 
 from batman import batman
 from alfred import alfred
-from rrd import rrd
+from rrddb import rrd
 from nodedb import NodeDB
 from d3mapbuilder import D3MapBuilder
 
