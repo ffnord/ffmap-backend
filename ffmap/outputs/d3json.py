@@ -50,26 +50,27 @@ class Output:
                         "type": "vpn" if neighbor["neighbor"]["vpn"] or node["vpn"] else None,
                         "id": "-".join((node.id, neighbor["neighbor"].id)),
                     }
+            clientcount = 0
             for client in node.get("clients", []):
-                if not client in indexes:
-                    nodes.append({
-                        "id": client,
-                        "flags": {
-                            "client": True,
-                            "online": True,
-                            "gateway": False
-                        }
-                    })
-                    indexes[client] = count
-                    count += 1
+                nodes.append({
+                    "id": "%s-%s" % (node.id, clientcount),
+                    "flags": {
+                        "client": True,
+                        "online": True,
+                        "gateway": False
+                    }
+                })
+                indexes[client] = count
 
                 links[(node.id, client)] = {
                     "source": indexes[node.id],
                     "target": indexes[client],
                     "quality": "TT",
                     "type": "client",
-                    "id": "-".join((node.id, client)),
+                    "id": "%s-%i" % (node.id, clientcount),
                 }
+                count += 1
+                clientcount += 1
 
         return {
             "nodes": nodes,
