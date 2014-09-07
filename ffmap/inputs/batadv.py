@@ -28,8 +28,8 @@ class Input:
         if mac_a[1] != mac_b[1] or mac_a[2] != mac_b[2]:
             return False
 
-        # First byte must only differ in bit 2
-        if mac_a[0] | 2 != mac_b[0] | 2:
+        # First byte must only differ in bits 2 and 3
+        if mac_a[0] | 6 != mac_b[0] | 6:
             return False
 
         # Count differing bytes after the third
