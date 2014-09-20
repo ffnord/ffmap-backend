@@ -31,6 +31,7 @@ class NodeDB:
       obj.append({ 'id': node.id
                  , 'name': node.name
                  , 'lastseen': node.lastseen
+                 , 'firstseen': node.firstseen
                  , 'geo': node.gps
                  })
 
@@ -52,6 +53,9 @@ class NodeDB:
             node.lastseen = n['lastseen']
             node.gps = n['geo']
             self._nodes.append(node)
+
+          if 'firstseen' in n:
+            node.firstseen = n['firstseen']
 
     except:
       pass
@@ -80,6 +84,7 @@ class NodeDB:
         except:
           node = Node()
           node.lastseen = self.time
+          node.firstseen = self.time
           node.flags['online'] = True
           self._nodes.append(node)
 
@@ -97,6 +102,7 @@ class NodeDB:
         except:
           node = Node()
           node.lastseen = self.time
+          node.firstseen = self.time
           node.flags['online'] = True
           node.add_mac(x['router'])
           self._nodes.append(node)
@@ -115,6 +121,7 @@ class NodeDB:
         except:
           node = Node()
           node.lastseen = self.time
+          node.firstseen = self.time
           node.flags['online'] = True
           node.add_mac(x['neighbor'])
           self._nodes.append(node)

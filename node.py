@@ -12,6 +12,7 @@ class Node():
     self.firmware = None
     self.clientcount = 0
     self.lastseen = 0
+    self.firstseen = 0
 
   def add_mac(self, mac):
     mac = mac.lower()
