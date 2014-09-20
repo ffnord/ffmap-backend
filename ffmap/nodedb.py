@@ -42,7 +42,7 @@ class NodeDB(dict):
             if id_ == node_id:
                 continue
             if id_ in self:
-                if node is not None:
+                if node is not None and node is not self[id_]:
                     raise AmbiguityError([node_id, id_])
                 node = self[id_]
                 node_id = id_
