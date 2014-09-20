@@ -29,4 +29,5 @@ class Input:
                 nodeinfo[mac]['statistics'] = statistics[mac]
 
         for mac, node in nodeinfo.items():
-            nodedb.add_or_update([mac], node)
+            aliases = [mac] + node.get('network', {}).get('mesh_interfaces', [])
+            nodedb.add_or_update(aliases, node)
