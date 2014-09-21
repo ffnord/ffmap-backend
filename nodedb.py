@@ -171,10 +171,14 @@ class NodeDB:
         try:
           node = self.maybe_node_by_mac((x['router'], ))
           node.add_mac(x['gateway'])
-          if not is_similar(x['router'], x['gateway']):
-            node.clientcount += 1
+          node.clientcount += 1
         except:
           pass
+
+    # don't count node as its own client
+    for node in self._nodes:
+      if node.clientcount > 0:
+        node.clientcount -= 1
 
   def reduce_links(self):
     tmp_links = defaultdict(list)
@@ -245,32 +249,3 @@ class NodeDB:
             changes += 1
 
           link.type = "vpn"
-
-# compares two MACs and decides whether they are
-# similar and could be from the same node
-def is_similar(a, b):
-  if a == b:
-    return True
-
-  try:
-    mac_a = list(int(i, 16) for i in a.split(":"))
-    mac_b = list(int(i, 16) for i in b.split(":"))
-  except ValueError:
-    return False
-
-  # first byte must only differ in bit 2
-  if mac_a[0] | 2 == mac_b[0] | 2:
-    # count different bytes
-    c = [x for x in zip(mac_a[1:], mac_b[1:]) if x[0] != x[1]]
-  else:
-    return False
-
-  # no more than two additional bytes must differ
-  if len(c) <= 2:
-    delta = 0
-
-  if len(c) > 0:
-    delta = sum(abs(i[0] -i[1]) for i in c)
-
-  # These addresses look pretty similar!
-  return delta < 8
