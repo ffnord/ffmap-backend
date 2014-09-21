@@ -224,18 +224,12 @@ class NodeDB:
       if 'id' in alias:
         node.id = alias['id']
 
-  # list of macs
-  # if options['gateway']:
-  #   mark_gateways(options['gateway'])
-  def mark_gateways(self, gateways):
-    for gateway in gateways:
-      try:
-        node = self.maybe_node_by_mac((gateway, ))
-      except:
-        print("WARNING: did not find gateway '",gateway,"' in node list")
-        continue
-
+  def mark_gateway(self, gateway):
+    try:
+      node = self.maybe_node_by_mac((gateway, ))
       node.flags['gateway'] = True
+    except KeyError:
+      print("WARNING: did not find gateway ", gateway, " in node list")
 
   def update_vpn_links(self):
     changes = 1

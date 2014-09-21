@@ -29,6 +29,7 @@ parser.add_argument('-a', '--aliases',
                   metavar='FILE')
 
 parser.add_argument('-m', '--mesh', action='append',
+                  default=["bat0"],
                   help='batman mesh interface')
 
 parser.add_argument('-A', '--alfred', action='store_true',
@@ -43,17 +44,11 @@ options = vars(args)
 
 db = NodeDB(int(time.time()))
 
-if options['mesh']:
-  for mesh_interface in options['mesh']:
-    bm = batman(mesh_interface)
-    db.parse_vis_data(bm.vis_data(options['alfred']))
-    for gw in bm.gateway_list():
-      db.mark_gateways(gw['mac'])
-else:
-  bm = batman()
+for mesh_interface in options['mesh']:
+  bm = batman(mesh_interface)
   db.parse_vis_data(bm.vis_data(options['alfred']))
   for gw in bm.gateway_list():
-    db.mark_gateways([gw['mac']])
+    db.mark_gateway(gw)
 
 if options['aliases']:
   for aliases in options['aliases']:

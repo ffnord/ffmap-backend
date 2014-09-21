@@ -45,22 +45,20 @@ class batman:
     """
     output = subprocess.check_output(["batctl","-m",self.mesh_interface,"gwl","-n"])
     output_utf8 = output.decode("utf-8")
-    # TODO Parse information
     lines = output_utf8.splitlines()
-    own_mac = re.match(r"^.*MainIF/MAC: [^/]+/([0-9a-f:]+).*$",lines[0]).group(1)
-    # Remove header line
-    del lines[0]
-    # Fill gateway list
+
+    own_mac = re.match(r"^.*MainIF/MAC: [^/]+/([0-9a-f:]+).*$", lines[0]).group(1)
+
     gw = []
     gw_mode = self.gateway_mode()
     if gw_mode['mode'] == 'server':
-      gw.append({'mac': own_mac, 'bandwidth': gw_mode['bandwidth']})
+      gw.append(own_mac)
+
     for line in lines:
-      gw_line = line.split()
-      if (gw_line[0] == 'No'):
-        continue
-      # When in client gateway mode maybe gw_line[0] is not the right.
-      gw.append({'mac':gw_line[0], 'bandwidth': gw_line[-1]})
+      gw_line = re.match(r"^(?:=>)? +([0-9a-f:]+) ", line)
+      if gw_line:
+        gw.append(gw_line.group(1))
+
     return gw
 
   def gateway_mode(self):
