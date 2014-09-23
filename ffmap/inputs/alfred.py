@@ -5,23 +5,19 @@ class Input:
     def __init__(self,request_data_type = 158):
         self.request_data_type = request_data_type
 
+    @staticmethod
+    def _call_alfred(request_data_type):
+        return json.loads(subprocess.check_output([
+            "alfred-json",
+            "-z",
+            "-r", str(request_data_type),
+            "-f", "json",
+        ]).decode("utf-8"))
+
     def get_data(self, nodedb):
         """Add data from alfred to the supplied nodedb"""
-        # get nodeinfo
-        output = subprocess.check_output([
-            "alfred-json",
-            "-r", str(self.request_data_type),
-            "-f", "json",
-        ])
-        nodeinfo = json.loads(output.decode("utf-8"))
-
-        # get statistics
-        output = subprocess.check_output([
-            "alfred-json",
-            "-r", str(self.request_data_type+1),
-            "-f", "json",
-        ])
-        statistics = json.loads(output.decode("utf-8"))
+        nodeinfo = self._call_alfred(self.request_data_type)
+        statistics = self._call_alfred(self.request_data_type+1)
 
         # merge statistics into nodeinfo to be compatible with earlier versions
         for mac, node in statistics.items():
