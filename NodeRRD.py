@@ -1,6 +1,5 @@
 import os
 import subprocess
-from node import Node
 from RRD import RRD, DS, RRA
 
 class NodeRRD(RRD):
@@ -30,7 +29,7 @@ class NodeRRD(RRD):
         return os.path.basename(self.filename).rsplit('.', 2)[0] + ".png"
 
     def update(self):
-        super().update({'upstate': 1, 'clients': self.node.clientcount})
+        super().update({'upstate': int(self.node['flags']['online']), 'clients': self.node['statistics']['clients']})
 
     def graph(self, directory, timeframe):
         """

@@ -26,23 +26,16 @@ class rrd:
     except:
       os.mkdir(self.imagePath)
 
-  def update_database(self,db):
-    nodes = db.get_nodes()
-    clientCount = sum(map(lambda d: d.clientcount, nodes))
+  def update_database(self, nodes):
+    online_nodes = dict(filter(lambda d: d[1]['flags']['online'], nodes.items()))
+    client_count = sum(map(lambda d: d['statistics']['clients'], online_nodes.values()))
 
-    curtime = time.time() - 60
-    self.globalDb.update(len(list(filter(lambda x: x.lastseen >= curtime, nodes))), clientCount)
-    for node in nodes:
-      rrd = NodeRRD(
-        os.path.join(self.dbPath, str(node.id).replace(':', '') + '.rrd'),
-        node
-      )
+    self.globalDb.update(len(online_nodes), client_count)
+    for node_id, node in online_nodes.items():
+      rrd = NodeRRD(os.path.join(self.dbPath, node_id + '.rrd'), node)
       rrd.update()
 
   def update_images(self):
-    """ Creates an image for every rrd file in the database directory.
-    """
-
     self.globalDb.graph(os.path.join(self.imagePath, "globalGraph.png"), self.displayTimeGlobal)
 
     nodeDbFiles = os.listdir(self.dbPath)

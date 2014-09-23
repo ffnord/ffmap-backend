@@ -1,9 +1,24 @@
-{
-   "b0:48:7a:e7:d3:64" : {
-      "name" : "Meute-AP"
-   },
-   "8e:3d:c2:10:10:28" : {
-      "name" : "holstentor",
-      "vpn" : true
-   }
-}
+[
+  {
+    "node_id": "krtek",
+    "hostname": "krtek",
+    "location": {
+      "longitude": 10.74,
+      "latitude": 53.86
+    },
+    "network": {
+      "mesh_interfaces": [
+        "00:25:86:e6:f1:bf"
+      ]
+    }
+  },
+  {
+    "node_id": "gw1",
+    "hostname": "burgtor",
+    "network": {
+      "mesh_interfaces": [
+        "52:54:00:f3:62:d9"
+      ]
+    }
+  }
+]
