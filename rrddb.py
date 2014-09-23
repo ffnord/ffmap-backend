@@ -30,7 +30,8 @@ class rrd:
     nodes = db.get_nodes()
     clientCount = sum(map(lambda d: d.clientcount, nodes))
 
-    self.globalDb.update(len(nodes), clientCount)
+    curtime = time.time() - 60
+    self.globalDb.update(len(list(filter(lambda x: x.lastseen >= curtime, nodes))), clientCount)
     for node in nodes:
       rrd = NodeRRD(
         os.path.join(self.dbPath, str(node.id).replace(':', '') + '.rrd'),
