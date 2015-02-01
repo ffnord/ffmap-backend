@@ -110,7 +110,7 @@ class NodeDB:
         try:
           if 'neighbor' in x:
             try:
-              node = self.maybe_node_by_mac((x['neighbor']))
+              node = self.maybe_node_by_mac((x['neighbor'], ))
             except:
               continue
 
