@@ -46,7 +46,7 @@ class NodeDB:
         for n in obj:
           try:
             node = self.maybe_node_by_id(n['id'])
-          except:
+          except KeyError:
             node = Node()
             node.id = n['id']
             node.name = n['name']
@@ -81,7 +81,7 @@ class NodeDB:
       if 'of' in x:
         try:
           node = self.maybe_node_by_mac((x['of'], x['secondary']))
-        except:
+        except KeyError:
           node = Node()
           node.lastseen = self.time
           node.firstseen = self.time
@@ -99,7 +99,7 @@ class NodeDB:
 
         try:
           node = self.maybe_node_by_mac((x['router'], ))
-        except:
+        except KeyError:
           node = Node()
           node.lastseen = self.time
           node.firstseen = self.time
@@ -111,14 +111,14 @@ class NodeDB:
           if 'neighbor' in x:
             try:
               node = self.maybe_node_by_mac((x['neighbor'], ))
-            except:
+            except KeyError:
               continue
 
           if 'gateway' in x:
             x['neighbor'] = x['gateway']
 
           node = self.maybe_node_by_mac((x['neighbor'], ))
-        except:
+        except KeyError:
           node = Node()
           node.lastseen = self.time
           node.firstseen = self.time
@@ -138,7 +138,7 @@ class NodeDB:
 
           router = self.maybe_node_by_mac((x['router'], ))
           neighbor = self.maybe_node_by_mac((x['neighbor'], ))
-        except:
+        except KeyError:
           continue
 
         # filter TT links merged in previous step
@@ -161,7 +161,7 @@ class NodeDB:
       if 'primary' in x:
         try:
           node = self.maybe_node_by_mac((x['primary'], ))
-        except:
+        except KeyError:
           continue
 
         node.id = x['primary']
@@ -172,9 +172,9 @@ class NodeDB:
           node = self.maybe_node_by_mac((x['router'], ))
           node.add_mac(x['gateway'])
           node.clientcount += 1
-        except:
+        except KeyError:
           pass
-
+ 
     # don't count node as its own client
     for node in self._nodes:
       if node.clientcount > 0:
@@ -207,7 +207,7 @@ class NodeDB:
     for mac, alias in aliases.items():
       try:
         node = self.maybe_node_by_mac([mac])
-      except:
+      except KeyError:
         # create an offline node
         node = Node()
         node.add_mac(mac)
