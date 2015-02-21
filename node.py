@@ -24,7 +24,7 @@ class Node():
     self.interfaces[mac] = Interface()
 
   def __repr__(self):
-    return self.macs.__repr__()
+    return '<Node %s>' % self.macs.__repr__()
 
 class Interface():
   def __init__(self):
