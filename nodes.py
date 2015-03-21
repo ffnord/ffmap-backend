@@ -30,6 +30,7 @@ def prune_nodes(nodes, now, days):
     del nodes[node_id]
 
 def mark_online(node, now):
+  node['lastseen'] = now.isoformat()
   node.setdefault('firstseen', now.isoformat())
   node['flags']['online'] = True
 
@@ -41,7 +42,6 @@ def import_nodeinfo(nodes, nodeinfos, now, assume_online=False):
     node['flags']['gateway'] = False
 
     if assume_online:
-      node['lastseen'] = now.isoformat()
       mark_online(node, now)
 
 def reset_statistics(nodes):
