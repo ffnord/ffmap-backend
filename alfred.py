@@ -3,7 +3,8 @@ import json
 
 
 def _fetch(data_type):
-    output = subprocess.check_output(["alfred-json", "-z", "-f", "json", "-r", str(data_type)])
+    output = subprocess.check_output(
+        ["alfred-json", "-z", "-f", "json", "-r", str(data_type)])
     return json.loads(output.decode("utf-8")).values()
 
 
@@ -26,8 +27,9 @@ def aliases():
 
         try:
             # TODO: better pass lat, lng as a tuple?
-            node_alias['gps'] = "{lat}\x20{lng}".format(lat=node['location']['latitude'],
-                                                        lng=node['location']['longitude'])
+            node_alias['gps'] = "{lat}\x20{lng}".\
+                format(lat=node['location']['latitude'],
+                       lng=node['location']['longitude'])
         except KeyError:
             pass
 
