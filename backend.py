@@ -18,9 +18,6 @@ from rrddb import RRD
 
 
 def main(params):
-    if not params['mesh']:
-        params['mesh'] = ['bat0']
-
     nodes_fn = os.path.join(params['destination_directory'], 'nodes.json')
     graph_fn = os.path.join(params['destination_directory'], 'graph.json')
 
@@ -73,8 +70,9 @@ def main(params):
     with open(graph_fn, 'w') as f:
         json.dump({'batadv': json_graph.node_link_data(batadv_graph)}, f)
 
-    scriptdir = os.path.dirname(os.path.realpath(__file__))
-    rrd = RRD(scriptdir + '/nodedb/', params['destination_directory'] + '/nodes')
+    script_directory = os.path.dirname(os.path.realpath(__file__))
+    rrd = RRD(os.path.join(script_directory, 'nodedb'),
+              os.path.join(params['destination_directory'], 'nodes'))
     rrd.update_database(nodedb['nodes'])
     rrd.update_images()
 
@@ -87,7 +85,8 @@ if __name__ == '__main__':
                         default=[], action='append',
                         metavar='FILE')
     parser.add_argument('-m', '--mesh', action='append',
-                        help='batman mesh interface')
+                        default=['bat0'],
+                        help='batman mesh interface (defaults to bat0)')
     parser.add_argument('-d', '--destination-directory', action='store',
                         help='destination directory for generated files',
                         required=True)
