@@ -1,4 +1,8 @@
-*.pyc
+# script-generated
 aliases*.json
 nodedb/
+
+# python bytecode / cache
+*.pyc
 pycache/
+__pycache__/
