@@ -8,17 +8,15 @@ class Alfred(object):
     Bindings for the alfred-json utility
     """
     def __init__(self, unix_sockpath=None):
-        if unix_sockpath:
-            if os.path.exists(unix_sockpath):
-                self.unix_sock = unix_sockpath
-            else:
-                raise RuntimeError('alfred: invalid unix socket path given')
+        self.unix_sock = unix_sockpath
+        if unix_sockpath is not None and not os.path.exists(unix_sockpath):
+            raise RuntimeError('alfred: invalid unix socket path given')
 
     def _fetch(self, data_type):
         cmd = ['alfred-json',
                '-z',
                '-f', 'json',
-               '-r', data_type]
+               '-r', str(data_type)]
         if self.unix_sock:
             cmd.extend(['-s', self.unix_sock])
 
