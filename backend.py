@@ -74,11 +74,12 @@ def main(params):
     with open(graph_fn, 'w') as f:
         json.dump({'batadv': json_graph.node_link_data(batadv_graph)}, f)
 
-    script_directory = os.path.dirname(os.path.realpath(__file__))
-    rrd = RRD(os.path.join(script_directory, 'nodedb'),
-              os.path.join(params['destination_directory'], 'nodes'))
-    rrd.update_database(nodedb['nodes'])
-    rrd.update_images()
+    if params['rrd']:
+        script_directory = os.path.dirname(os.path.realpath(__file__))
+        rrd = RRD(os.path.join(script_directory, 'nodedb'),
+                  os.path.join(params['destination_directory'], 'nodes'))
+        rrd.update_database(nodedb['nodes'])
+        rrd.update_images()
 
 
 if __name__ == '__main__':
@@ -98,6 +99,9 @@ if __name__ == '__main__':
                         help='assume MAC to be part of the VPN')
     parser.add_argument('--prune', metavar='DAYS',
                         help='forget nodes offline for at least DAYS')
+    parser.add_argument('--rrd', dest='rrd', action='store_true',
+                        default=False,
+                        help='create RRD graphs')
 
     options = vars(parser.parse_args())
 
