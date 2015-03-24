@@ -35,16 +35,20 @@ def main(params):
     for node_id, node in nodedb['nodes'].items():
         node['flags']['online'] = False
 
-    nodes.import_nodeinfo(nodedb['nodes'], alfred.nodeinfo(), now, assume_online=True)
+    nodes.import_nodeinfo(nodedb['nodes'], alfred.nodeinfo(),
+                          now, assume_online=True)
 
     for aliases in params['aliases']:
         with open(aliases, 'r') as f:
-            nodes.import_nodeinfo(nodedb['nodes'], json.load(f), now, assume_online=False)
+            nodes.import_nodeinfo(nodedb['nodes'], json.load(f),
+                                  now, assume_online=False)
 
     nodes.reset_statistics(nodedb['nodes'])
     nodes.import_statistics(nodedb['nodes'], alfred.statistics())
 
-    bm = list(map(lambda d: (d.vis_data(True), d.gateway_list()), map(Batman, params['mesh'])))
+    bm = list(map(lambda d:
+                  (d.vis_data(True), d.gateway_list()),
+                  map(Batman, params['mesh'])))
     for vis_data, gateway_list in bm:
         nodes.import_mesh_ifs_vis_data(nodedb['nodes'], vis_data)
         nodes.import_vis_clientcount(nodedb['nodes'], vis_data)

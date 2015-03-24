@@ -3,7 +3,8 @@ import json
 
 
 def _fetch(data_type):
-    output = subprocess.check_output(["alfred-json", "-z", "-f", "json", "-r", str(data_type)])
+    output = subprocess.check_output(
+        ["alfred-json", "-z", "-f", "json", "-r", str(data_type)])
     return json.loads(output.decode("utf-8")).values()
 
 

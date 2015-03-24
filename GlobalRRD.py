@@ -23,8 +23,9 @@ class GlobalRRD(RRD):
         super().__init__(os.path.join(directory, "nodes.rrd"))
         self.ensure_sanity(self.ds_list, self.rra_list, step=60)
 
-    def update(self, nodeCount, clientCount):
-        super().update({'nodes': nodeCount, 'clients': clientCount})
+    # TODO: fix this, python does not support function overloading
+    def update(self, node_count, client_count):
+        super().update({'nodes': node_count, 'clients': client_count})
 
     def graph(self, filename, timeframe):
         args = ["rrdtool", 'graph', filename,
