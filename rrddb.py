@@ -1,50 +1,50 @@
 #!/usr/bin/env python3
-import subprocess
 import time
 import os
 from GlobalRRD import GlobalRRD
 from NodeRRD import NodeRRD
 
-class rrd:
-  def __init__( self
-              , databaseDirectory
-              , imagePath
-              , displayTimeGlobal = "7d"
-              , displayTimeNode = "1d"
-              ):
-    self.dbPath = databaseDirectory
-    self.globalDb = GlobalRRD(self.dbPath)
-    self.imagePath = imagePath
-    self.displayTimeGlobal = displayTimeGlobal
-    self.displayTimeNode = displayTimeNode
 
-    self.currentTimeInt = (int(time.time())/60)*60
-    self.currentTime    = str(self.currentTimeInt)
+class RRD(object):
+    def __init__(self,
+                 database_directory,
+                 image_path,
+                 display_time_global="7d",
+                 display_time_node="1d"):
 
-    try:
-      os.stat(self.imagePath)
-    except:
-      os.mkdir(self.imagePath)
+        self.dbPath = database_directory
+        self.globalDb = GlobalRRD(self.dbPath)
+        self.imagePath = image_path
+        self.displayTimeGlobal = display_time_global
+        self.displayTimeNode = display_time_node
 
-  def update_database(self, nodes):
-    online_nodes = dict(filter(lambda d: d[1]['flags']['online'], nodes.items()))
-    client_count = sum(map(lambda d: d['statistics']['clients'], online_nodes.values()))
+        self.currentTimeInt = (int(time.time())/60)*60
+        self.currentTime = str(self.currentTimeInt)
 
-    self.globalDb.update(len(online_nodes), client_count)
-    for node_id, node in online_nodes.items():
-      rrd = NodeRRD(os.path.join(self.dbPath, node_id + '.rrd'), node)
-      rrd.update()
+        try:
+            os.stat(self.imagePath)
+        except OSError:
+            os.mkdir(self.imagePath)
 
-  def update_images(self):
-    self.globalDb.graph(os.path.join(self.imagePath, "globalGraph.png"), self.displayTimeGlobal)
+    def update_database(self, nodes):
+        online_nodes = dict(filter(lambda d: d[1]['flags']['online'], nodes.items()))
+        client_count = sum(map(lambda d: d['statistics']['clients'], online_nodes.values()))
 
-    nodeDbFiles = os.listdir(self.dbPath)
+        self.globalDb.update(len(online_nodes), client_count)
+        for node_id, node in online_nodes.items():
+            rrd = NodeRRD(os.path.join(self.dbPath, node_id + '.rrd'), node)
+            rrd.update()
 
-    for fileName in nodeDbFiles:
-      if not os.path.isfile(os.path.join(self.dbPath, fileName)):
-        continue
+    def update_images(self):
+        self.globalDb.graph(os.path.join(self.imagePath, "globalGraph.png"), self.displayTimeGlobal)
 
-      nodeName = os.path.basename(fileName).split('.')
-      if nodeName[1] == 'rrd' and not nodeName[0] == "nodes":
-        rrd = NodeRRD(os.path.join(self.dbPath, fileName))
-        rrd.graph(self.imagePath, self.displayTimeNode)
+        nodedb_files = os.listdir(self.dbPath)
+
+        for file_name in nodedb_files:
+            if not os.path.isfile(os.path.join(self.dbPath, file_name)):
+                continue
+
+            node_name = os.path.basename(file_name).split('.')
+            if node_name[1] == 'rrd' and not node_name[0] == "nodes":
+                rrd = NodeRRD(os.path.join(self.dbPath, file_name))
+                rrd.graph(self.imagePath, self.displayTimeNode)
