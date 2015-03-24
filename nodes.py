@@ -27,8 +27,8 @@ def prune_nodes(nodes, now, days):
         if delta >= days * 86400:
             prune.append(node_id)
 
-        for prune_key in prune:
-            del nodes[prune_key]
+    for node_id in prune:
+        del nodes[node_id]
 
 
 def mark_online(node, now):
