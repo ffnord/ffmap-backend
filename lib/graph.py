@@ -1,7 +1,9 @@
-import networkx as nx
 from functools import reduce
 from itertools import chain
-from nodes import build_mac_table
+
+import networkx as nx
+
+from lib.nodes import build_mac_table
 
 
 def import_vis_data(graph, nodes, vis_data):

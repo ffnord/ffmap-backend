@@ -6,20 +6,20 @@ https://github.com/ffnord/ffmap-backend
 import argparse
 import json
 import os
-import networkx as nx
 from datetime import datetime
+
+import networkx as nx
 from networkx.readwrite import json_graph
 
-import alfred
-import nodes
-import graph
-from batman import Batman
-from rrddb import RRD
+from lib import graph, nodes
+from lib.alfred import Alfred
+from lib.batman import Batman
+from lib.rrddb import RRD
 
 
 def main(params):
-    nodes_fn = os.path.join(params['destination_directory'], 'nodes.json')
-    graph_fn = os.path.join(params['destination_directory'], 'graph.json')
+    nodes_fn = os.path.join(params['dest_dir'], 'nodes.json')
+    graph_fn = os.path.join(params['dest_dir'], 'graph.json')
 
     now = datetime.utcnow().replace(microsecond=0)
 
@@ -34,6 +34,8 @@ def main(params):
 
     for node_id, node in nodedb['nodes'].items():
         node['flags']['online'] = False
+
+    alfred = Alfred(unix_sockpath=params['alfred_sock'])
 
     nodes.import_nodeinfo(nodedb['nodes'], alfred.nodeinfo(),
                           now, assume_online=True)
@@ -77,7 +79,7 @@ def main(params):
     if params['rrd']:
         script_directory = os.path.dirname(os.path.realpath(__file__))
         rrd = RRD(os.path.join(script_directory, 'nodedb'),
-                  os.path.join(params['destination_directory'], 'nodes'))
+                  os.path.join(params['dest_dir'], 'nodes'))
         rrd.update_database(nodedb['nodes'])
         rrd.update_images()
 
@@ -92,7 +94,10 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--mesh', action='append',
                         default=['bat0'],
                         help='batman mesh interface (defaults to bat0)')
-    parser.add_argument('-d', '--destination-directory', action='store',
+    parser.add_argument('-s', '--alfred-sock',
+                        default=None,
+                        help='alfred unix socket path')
+    parser.add_argument('-d', '--dest-dir', action='store',
                         help='destination directory for generated files',
                         required=True)
     parser.add_argument('--vpn', action='append', metavar='MAC',
