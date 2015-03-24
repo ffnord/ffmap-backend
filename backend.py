@@ -11,7 +11,8 @@ from datetime import datetime
 import networkx as nx
 from networkx.readwrite import json_graph
 
-from lib import alfred, graph, nodes
+from lib import graph, nodes
+from lib.alfred import Alfred
 from lib.batman import Batman
 from lib.rrddb import RRD
 
@@ -33,6 +34,8 @@ def main(params):
 
     for node_id, node in nodedb['nodes'].items():
         node['flags']['online'] = False
+
+    alfred = Alfred(unix_sockpath=params['alfred_sock'])
 
     nodes.import_nodeinfo(nodedb['nodes'], alfred.nodeinfo(),
                           now, assume_online=True)
@@ -91,6 +94,9 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--mesh', action='append',
                         default=['bat0'],
                         help='batman mesh interface (defaults to bat0)')
+    parser.add_argument('-s', '--alfred-sock',
+                        default=None,
+                        help='alfred unix socket path')
     parser.add_argument('-d', '--dest-dir', action='store',
                         help='destination directory for generated files',
                         required=True)
