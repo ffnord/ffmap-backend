@@ -24,11 +24,13 @@ def aliases():
     alias = {}
     for node in nodeinfo():
         node_alias = {}
-        if 'location' in node:
-            try:
-                node_alias['gps'] = str(node['location']['latitude']) + ' ' + str(node['location']['longitude'])
-            except KeyError:
-                pass
+
+        try:
+            # TODO: better pass lat, lng as a tuple?
+            node_alias['gps'] = "{lat}\x20{lng}".format(lat=node['location']['latitude'],
+                                                        lng=node['location']['longitude'])
+        except KeyError:
+            pass
 
         try:
             node_alias['firmware'] = node['software']['firmware']['release']
