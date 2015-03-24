@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import time
 import os
-from GlobalRRD import GlobalRRD
-from NodeRRD import NodeRRD
+
+from lib.GlobalRRD import GlobalRRD
+from lib.NodeRRD import NodeRRD
 
 
 class RRD(object):

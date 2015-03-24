@@ -1,6 +1,7 @@
 import os
 import subprocess
-from RRD import RRD, DS, RRA
+
+from lib.RRD import DS, RRA, RRD
 
 
 class GlobalRRD(RRD):
