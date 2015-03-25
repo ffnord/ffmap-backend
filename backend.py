@@ -50,7 +50,7 @@ def main(params):
 
     bm = list(map(lambda d:
                   (d.vis_data(True), d.gateway_list()),
-                  map(Batman, params['mesh'])))
+                  map(Batman, params['mesh'], params['alfred_sock'])))
     for vis_data, gateway_list in bm:
         nodes.import_mesh_ifs_vis_data(nodedb['nodes'], vis_data)
         nodes.import_vis_clientcount(nodedb['nodes'], vis_data)

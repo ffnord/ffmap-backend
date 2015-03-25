@@ -8,8 +8,9 @@ class Batman(object):
     Bindings for B.A.T.M.A.N. Advanced
     commandline interface "batctl"
     """
-    def __init__(self, mesh_interface='bat0'):
+    def __init__(self, mesh_interface='bat0', alfred_sockpath=None):
         self.mesh_interface = mesh_interface
+        self.alfred_sock = alfred_sockpath
 
     def vis_data(self, batadv_vis=False):
         vds = self.vis_data_batctl_legacy()
@@ -44,8 +45,10 @@ class Batman(object):
         Parse "batadv-vis -i <mesh_interface> -f json"
         into an array of dictionaries.
         """
-        output = subprocess.check_output(
-            ['batadv-vis', '-i', self.mesh_interface, '-f', 'json'])
+        cmd = ['batadv-vis', '-i', self.mesh_interface, '-f', 'json']
+        if self.alfred_sock:
+            cmd.extend(['-u', self.alfred_sock])
+        output = subprocess.check_output(cmd)
         lines = output.splitlines()
         return self.vis_data_helper(lines)
 
