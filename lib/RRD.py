@@ -83,9 +83,11 @@ class RRD(object):
         info = self.info()
         if set(ds_list) - set(info['ds'].values()) != set():
             for ds in ds_list:
-                if ds.name in info['ds'] and ds.type != info['ds'][ds.name].type:
-                    raise RRDIncompatibleException("%s is %s but should be %s" %
-                                                   (ds.name, ds.type, info['ds'][ds.name].type))
+                if ds.name in info['ds'] and\
+                   ds.type != info['ds'][ds.name].type:
+                    raise RRDIncompatibleException(
+                        "{} is {} but should be {}".format(
+                            ds.name, ds.type, info['ds'][ds.name].type))
             else:
                 raise RRDOutdatedException()
 
@@ -108,8 +110,10 @@ class RRD(object):
             if ds.name in info['ds']:
                 old_ds = info['ds'][ds.name]
                 if info['ds'][ds.name].type != ds.type:
-                    raise RuntimeError('Cannot convert existing DS "%s" from type "%s" to "%s"' %
-                                       (ds.name, old_ds.type, ds.type))
+                    raise RuntimeError(
+                        "Cannot convert existing DS '{}'"
+                        "from type '{}' to '{}'".format(
+                            ds.name, old_ds.type, ds.type))
                 ds.index = old_ds.index
                 new_ds[ds.index] = ds
             else:
@@ -237,7 +241,8 @@ class RRD(object):
         for line in out.splitlines():
             base = info
             for match in self._info_regex.finditer(line):
-                section, key, name, value = match.group("section", "key", "name", "value")
+                section, key, name, value = match.group(
+                    "section", "key", "name", "value")
                 if section and key:
                     try:
                         key = int(key)
@@ -258,7 +263,8 @@ class RRD(object):
                             base[name] = value
         dss = {}
         for name, ds in info['ds'].items():
-            ds_obj = DS(name, ds['type'], ds['minimal_heartbeat'], ds['min'], ds['max'])
+            ds_obj = DS(name, ds['type'], ds['minimal_heartbeat'],
+                        ds['min'], ds['max'])
             ds_obj.index = ds['index']
             ds_obj.last_ds = ds['last_ds']
             ds_obj.value = ds['value']
@@ -267,7 +273,8 @@ class RRD(object):
         info['ds'] = dss
         rras = []
         for rra in info['rra'].values():
-            rras.append(RRA(rra['cf'], rra['xff'], rra['pdp_per_row'], rra['rows']))
+            rras.append(RRA(rra['cf'], rra['xff'],
+                            rra['pdp_per_row'], rra['rows']))
         info['rra'] = rras
         self._cached_info = info
         return info

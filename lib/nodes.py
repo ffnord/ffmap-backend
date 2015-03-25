@@ -53,23 +53,26 @@ def reset_statistics(nodes):
         node['statistics'] = {'clients': 0}
 
 
-def import_statistics(nodes, statistics):
+def import_statistics(nodes, stats):
     def add(node, statistics, target, source, f=lambda d: d):
         try:
-            node['statistics'][target] = f(reduce(dict.__getitem__, source, statistics))
+            node['statistics'][target] = f(reduce(dict.__getitem__,
+                                                  source,
+                                                  statistics))
         except (KeyError, TypeError):
             pass
 
     macs = build_mac_table(nodes)
-    statistics = filter(lambda d: 'node_id' in d, statistics)
-    statistics = filter(lambda d: d['node_id'] in nodes, statistics)
-    for node, statistics in map(lambda d: (nodes[d['node_id']], d), statistics):
-        add(node, statistics, 'clients', ['clients', 'total'])
-        add(node, statistics, 'gateway', ['gateway'], lambda d: macs.get(d, d))
-        add(node, statistics, 'uptime', ['uptime'])
-        add(node, statistics, 'loadavg', ['loadavg'])
-        add(node, statistics, 'memory_usage', ['memory'], lambda d: 1 - d['free'] / d['total'])
-        add(node, statistics, 'rootfs_usage', ['rootfs_usage'])
+    stats = filter(lambda d: 'node_id' in d, stats)
+    stats = filter(lambda d: d['node_id'] in nodes, stats)
+    for node, stats in map(lambda d: (nodes[d['node_id']], d), stats):
+        add(node, stats, 'clients', ['clients', 'total'])
+        add(node, stats, 'gateway', ['gateway'], lambda d: macs.get(d, d))
+        add(node, stats, 'uptime', ['uptime'])
+        add(node, stats, 'loadavg', ['loadavg'])
+        add(node, stats, 'memory_usage', ['memory'],
+            lambda d: 1 - d['free'] / d['total'])
+        add(node, stats, 'rootfs_usage', ['rootfs_usage'])
 
 
 def import_mesh_ifs_vis_data(nodes, vis_data):

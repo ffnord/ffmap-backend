@@ -32,11 +32,13 @@ class NodeRRD(RRD):
 
     @property
     def imagename(self):
-        return "{basename}.png".format(basename=os.path.basename(self.filename).rsplit('.', 2)[0])
+        return "{basename}.png".format(
+            basename=os.path.basename(self.filename).rsplit('.', 2)[0])
 
     # TODO: fix this, python does not support function overloading
     def update(self):
-        super().update({'upstate': int(self.node['flags']['online']), 'clients': self.node['statistics']['clients']})
+        super().update({'upstate': int(self.node['flags']['online']),
+                        'clients': self.node['statistics']['clients']})
 
     def graph(self, directory, timeframe):
         """

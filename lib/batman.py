@@ -8,8 +8,12 @@ class Batman(object):
     Bindings for B.A.T.M.A.N. Advanced
     commandline interface "batctl"
     """
-    def __init__(self, mesh_interface='bat0'):
+    def __init__(self, mesh_interface='bat0', alfred_sockpath=None):
         self.mesh_interface = mesh_interface
+        self.alfred_sock = alfred_sockpath
+
+        # compile regular expressions only once on startup
+        self.mac_addr_pattern = re.compile(r'(([a-z0-9]{2}:){5}[a-z0-9]{2})')
 
     def vis_data(self, batadv_vis=False):
         vds = self.vis_data_batctl_legacy()
@@ -44,8 +48,10 @@ class Batman(object):
         Parse "batadv-vis -i <mesh_interface> -f json"
         into an array of dictionaries.
         """
-        output = subprocess.check_output(
-            ['batadv-vis', '-i', self.mesh_interface, '-f', 'json'])
+        cmd = ['batadv-vis', '-i', self.mesh_interface, '-f', 'json']
+        if self.alfred_sock:
+            cmd.extend(['-u', self.alfred_sock])
+        output = subprocess.check_output(cmd)
         lines = output.splitlines()
         return self.vis_data_helper(lines)
 
@@ -57,36 +63,35 @@ class Batman(object):
         output = subprocess.check_output(
             ['batctl', '-m', self.mesh_interface, 'gwl', '-n'])
         output_utf8 = output.decode('utf-8')
-        lines = output_utf8.splitlines()
-
-        own_mac = re.match(r"^.*MainIF/MAC: [^/]+/([0-9a-f:]+).*$",
-                           lines[0]).group(1)
+        rows = output_utf8.splitlines()
 
         gateways = []
-        gw_mode = self.gateway_mode()
-        if gw_mode['mode'] == 'server':
-            gateways.append(own_mac)
 
-        for line in lines:
-            gw_line = re.match(r"^(?:=>)? +([0-9a-f:]+) ", line)
-            if gw_line:
-                gateways.append(gw_line.group(1))
+        # local gateway
+        header = rows.pop(0)
+        mode, bandwidth = self.gateway_mode()
+        if mode == 'server':
+            local_gw_mac = self.mac_addr_pattern.search(header).group(0)
+            gateways.append(local_gw_mac)
+
+        # remote gateway(s)
+        for row in rows:
+            match = self.mac_addr_pattern.search(row)
+            if match:
+                gateways.append(match.group(1))
 
         return gateways
 
     def gateway_mode(self):
         """
         Parse "batctl -m <mesh_interface> gw"
+        return: tuple mode, bandwidth, if mode != server then bandwidth is None
         """
         output = subprocess.check_output(
             ['batctl', '-m', self.mesh_interface, 'gw'])
-        elements = output.decode("utf-8").split()
-        mode = elements[0]
-        if mode == 'server':
-            return {'mode': 'server',
-                    'bandwidth': elements[3]}
-        else:
-            return {'mode': mode}
+        chunks = output.decode("utf-8").split()
+
+        return chunks[0], chunks[3] if 3 in chunks else None
 
 if __name__ == "__main__":
     bc = Batman()
