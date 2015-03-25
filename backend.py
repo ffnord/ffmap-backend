@@ -23,23 +23,24 @@ def main(params):
 
     now = datetime.utcnow().replace(microsecond=0)
 
+    # read nodedb state from node.json
     with open(nodes_fn, 'r') as nodedb_handle:
         nodedb = json.load(nodedb_handle)
-
     # flush nodedb if it uses the old format
     if 'links' in nodedb:
         nodedb = {'nodes': dict()}
 
+    # update timestamp and assume all nodes are offline
     nodedb['timestamp'] = now.isoformat()
-
     for node_id, node in nodedb['nodes'].items():
         node['flags']['online'] = False
 
+    # integrate alfred nodeinfo
     alfred = Alfred(unix_sockpath=params['alfred_sock'])
-
     nodes.import_nodeinfo(nodedb['nodes'], alfred.nodeinfo(),
                           now, assume_online=True)
 
+    # integrate static aliases data
     for aliases in params['aliases']:
         with open(aliases, 'r') as f:
             nodes.import_nodeinfo(nodedb['nodes'], json.load(f),
@@ -48,34 +49,49 @@ def main(params):
     nodes.reset_statistics(nodedb['nodes'])
     nodes.import_statistics(nodedb['nodes'], alfred.statistics())
 
-    bm = list(map(lambda d:
-                  (d.vis_data(True), d.gateway_list()),
-                  map(Batman, params['mesh'], params['alfred_sock'])))
-    for vis_data, gateway_list in bm:
-        nodes.import_mesh_ifs_vis_data(nodedb['nodes'], vis_data)
-        nodes.import_vis_clientcount(nodedb['nodes'], vis_data)
-        nodes.mark_vis_data_online(nodedb['nodes'], vis_data, now)
-        nodes.mark_gateways(nodedb['nodes'], gateway_list)
+    # initialize batman bindings for each mesh interface
+    # and acquire gwl and visdata
+    mesh_interfaces = frozenset(params['mesh'])
+    mesh_info = {}
+    for interface in mesh_interfaces:
+        bm = Batman(mesh_interface=interface,
+                    alfred_sockpath=params['alfred_sock'])
+        vd = bm.vis_data(True)
+        gwl = bm.gateway_list()
 
+        mesh_info[interface] = (vd, gwl)
+
+    # update nodedb from batman-adv data
+    for vd, gwl in mesh_info.values():
+        nodes.import_mesh_ifs_vis_data(nodedb['nodes'], vd)
+        nodes.import_vis_clientcount(nodedb['nodes'], vd)
+        nodes.mark_vis_data_online(nodedb['nodes'], vd, now)
+        nodes.mark_gateways(nodedb['nodes'], gwl)
+
+    # clear the nodedb from nodes that have not been online in $prune days
     if params['prune']:
         nodes.prune_nodes(nodedb['nodes'], now, int(params['prune']))
 
+    # build nxnetworks graph from nodedb and visdata
     batadv_graph = nx.DiGraph()
-    for vis_data, gateway_list in bm:
-        graph.import_vis_data(batadv_graph, nodedb['nodes'], vis_data)
+    for vd, gwl in mesh_info.values():
+        graph.import_vis_data(batadv_graph, nodedb['nodes'], vd)
 
+    # force mac addresses to be vpn-link only (like gateways for example)
     if params['vpn']:
         graph.mark_vpn(batadv_graph, frozenset(params['vpn']))
 
     batadv_graph = graph.merge_nodes(batadv_graph)
     batadv_graph = graph.to_undirected(batadv_graph)
 
+    # write processed data to dest dir
     with open(nodes_fn, 'w') as f:
         json.dump(nodedb, f)
 
     with open(graph_fn, 'w') as f:
         json.dump({'batadv': json_graph.node_link_data(batadv_graph)}, f)
 
+    # optional rrd graphs (trigger with --rrd)
     if params['rrd']:
         script_directory = os.path.dirname(os.path.realpath(__file__))
         rrd = RRD(os.path.join(script_directory, 'nodedb'),
