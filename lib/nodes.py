@@ -22,9 +22,9 @@ def prune_nodes(nodes, now, days):
             continue
 
         lastseen = datetime.strptime(node['lastseen'], '%Y-%m-%dT%H:%M:%S')
-        delta = (now - lastseen).seconds
+        delta = (now - lastseen).days
 
-        if delta >= days * 86400:
+        if delta >= days:
             prune.append(node_id)
 
     for node_id in prune:
