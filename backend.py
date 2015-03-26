@@ -135,8 +135,9 @@ if __name__ == '__main__':
                         metavar='FILE')
     parser.add_argument('-m', '--mesh',
                         default=['bat0'], nargs='+',
-                        help='Use given batman-adv mesh interface(s) (defaults to bat0); '
-                             'specify alfred unix socket like bat0:/run/alfred0.sock.')
+                        help='Use given batman-adv mesh interface(s) (defaults'
+                             'to bat0); specify alfred unix socket like '
+                             'bat0:/run/alfred0.sock.')
     parser.add_argument('-d', '--dest-dir', action='store',
                         help='Write output to destination directory',
                         required=True)
@@ -146,7 +147,8 @@ if __name__ == '__main__':
                         help='forget nodes offline for at least DAYS')
     parser.add_argument('--with-rrd', dest='rrd', action='store_true',
                         default=False,
-                        help='enable the rendering of RRD graphs (cpu intensive)')
+                        help='enable the rendering of RRD graphs (cpu '
+                             'intensive)')
 
     options = vars(parser.parse_args())
     main(options)
