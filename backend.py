@@ -6,6 +6,7 @@ https://github.com/ffnord/ffmap-backend
 import argparse
 import json
 import os
+import sys
 from datetime import datetime
 
 import networkx as nx
@@ -23,9 +24,37 @@ def main(params):
 
     now = datetime.utcnow().replace(microsecond=0)
 
+    # parse mesh param and instantiate Alfred/Batman instances
+    alfred_instances = []
+    batman_instances = []
+    for value in params['mesh']:
+        # (1) only batman-adv if, no alfred sock
+        if ':' not in value:
+            if len(params['mesh']) > 1:
+                raise ValueError(
+                    'Multiple mesh interfaces require the use of '
+                    'alfred socket paths.')
+            alfred_instances.append(Alfred(unix_sockpath=None))
+            batman_instances.append(Batman(mesh_interface=value))
+        else:
+            # (2) batman-adv if + alfred socket
+            try:
+                batif, alfredsock = value.split(':')
+                alfred_instances.append(Alfred(unix_sockpath=alfredsock))
+                batman_instances.append(Batman(mesh_interface=batif,
+                                               alfred_sockpath=alfredsock))
+            except ValueError:
+                raise ValueError(
+                    'Unparseable value "{0}" in --mesh parameter.'.
+                    format(value))
+
     # read nodedb state from node.json
-    with open(nodes_fn, 'r') as nodedb_handle:
-        nodedb = json.load(nodedb_handle)
+    try:
+        with open(nodes_fn, 'r') as nodedb_handle:
+            nodedb = json.load(nodedb_handle)
+    except FileNotFoundError:
+        nodedb = {'nodes': dict()}
+
     # flush nodedb if it uses the old format
     if 'links' in nodedb:
         nodedb = {'nodes': dict()}
@@ -36,9 +65,9 @@ def main(params):
         node['flags']['online'] = False
 
     # integrate alfred nodeinfo
-    alfred = Alfred(unix_sockpath=params['alfred_sock'])
-    nodes.import_nodeinfo(nodedb['nodes'], alfred.nodeinfo(),
-                          now, assume_online=True)
+    for alfred in alfred_instances:
+        nodes.import_nodeinfo(nodedb['nodes'], alfred.nodeinfo(),
+                              now, assume_online=True)
 
     # integrate static aliases data
     for aliases in params['aliases']:
@@ -47,22 +76,19 @@ def main(params):
                                   now, assume_online=False)
 
     nodes.reset_statistics(nodedb['nodes'])
-    nodes.import_statistics(nodedb['nodes'], alfred.statistics())
+    for alfred in alfred_instances:
+        nodes.import_statistics(nodedb['nodes'], alfred.statistics())
 
-    # initialize batman bindings for each mesh interface
-    # and acquire gwl and visdata
-    mesh_interfaces = frozenset(params['mesh'])
-    mesh_info = {}
-    for interface in mesh_interfaces:
-        bm = Batman(mesh_interface=interface,
-                    alfred_sockpath=params['alfred_sock'])
-        vd = bm.vis_data(True)
-        gwl = bm.gateway_list()
+    # acquire gwl and visdata for each batman instance
+    mesh_info = []
+    for batman in batman_instances:
+        vd = batman.vis_data(True)
+        gwl = batman.gateway_list()
 
-        mesh_info[interface] = (vd, gwl)
+        mesh_info.append((vd, gwl))
 
     # update nodedb from batman-adv data
-    for vd, gwl in mesh_info.values():
+    for vd, gwl in mesh_info:
         nodes.import_mesh_ifs_vis_data(nodedb['nodes'], vd)
         nodes.import_vis_clientcount(nodedb['nodes'], vd)
         nodes.mark_vis_data_online(nodedb['nodes'], vd, now)
@@ -70,11 +96,11 @@ def main(params):
 
     # clear the nodedb from nodes that have not been online in $prune days
     if params['prune']:
-        nodes.prune_nodes(nodedb['nodes'], now, int(params['prune']))
+        nodes.prune_nodes(nodedb['nodes'], now, params['prune'])
 
     # build nxnetworks graph from nodedb and visdata
     batadv_graph = nx.DiGraph()
-    for vd, gwl in mesh_info.values():
+    for vd, gwl in mesh_info:
         graph.import_vis_data(batadv_graph, nodedb['nodes'], vd)
 
     # force mac addresses to be vpn-link only (like gateways for example)
@@ -104,26 +130,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-a', '--aliases',
-                        help='read aliases from FILE',
+                        help='Read aliases from FILE',
                         default=[], action='append',
                         metavar='FILE')
-    parser.add_argument('-m', '--mesh', action='append',
-                        default=['bat0'],
-                        help='batman mesh interface (defaults to bat0)')
-    parser.add_argument('-s', '--alfred-sock',
-                        default=None,
-                        help='alfred unix socket path')
+    parser.add_argument('-m', '--mesh',
+                        default=['bat0'], nargs='+',
+                        help='Use given batman-adv mesh interface(s) (defaults to bat0); '
+                             'specify alfred unix socket like bat0:/run/alfred0.sock.')
     parser.add_argument('-d', '--dest-dir', action='store',
-                        help='destination directory for generated files',
+                        help='Write output to destination directory',
                         required=True)
-    parser.add_argument('--vpn', action='append', metavar='MAC',
-                        help='assume MAC to be part of the VPN')
-    parser.add_argument('--prune', metavar='DAYS',
+    parser.add_argument('-V', '--vpn', nargs='+', metavar='MAC',
+                        help='Assume MAC addresses are part of vpn')
+    parser.add_argument('-p', '--prune', metavar='DAYS', type=int,
                         help='forget nodes offline for at least DAYS')
-    parser.add_argument('--rrd', dest='rrd', action='store_true',
+    parser.add_argument('--with-rrd', dest='rrd', action='store_true',
                         default=False,
-                        help='create RRD graphs')
+                        help='enable the rendering of RRD graphs (cpu intensive)')
 
     options = vars(parser.parse_args())
-
     main(options)
