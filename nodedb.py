@@ -70,7 +70,7 @@ class NodeDB:
 
   def maybe_node_by_id(self, mac):
     for node in self._nodes:
-      if mac.lower() == node.id:
+      if mac.lower() == node.id.lower():
         return node
 
     raise KeyError
