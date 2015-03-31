@@ -82,7 +82,7 @@ def main(params):
     # acquire gwl and visdata for each batman instance
     mesh_info = []
     for batman in batman_instances:
-        vd = batman.vis_data(True)
+        vd = batman.vis_data()
         gwl = batman.gateway_list()
 
         mesh_info.append((vd, gwl))

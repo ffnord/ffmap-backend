@@ -15,11 +15,8 @@ class Batman(object):
         # compile regular expressions only once on startup
         self.mac_addr_pattern = re.compile(r'(([a-z0-9]{2}:){5}[a-z0-9]{2})')
 
-    def vis_data(self, batadv_vis=False):
-        vds = self.vis_data_batctl_legacy()
-        if batadv_vis:
-            vds += self.vis_data_batadv_vis()
-        return vds
+    def vis_data(self):
+        return self.vis_data_batadv_vis()
 
     @staticmethod
     def vis_data_helper(lines):
@@ -31,17 +28,6 @@ class Batman(object):
             except UnicodeDecodeError:
                 pass
         return vd_tmp
-
-    def vis_data_batctl_legacy(self):
-        """
-        Parse "batctl -m <mesh_interface> vd json -n"
-        into an array of dictionaries.
-        """
-        output = subprocess.check_output(
-            ['batctl', '-m', self.mesh_interface, 'vd', 'json', '-n'])
-        lines = output.splitlines()
-        vds = self.vis_data_helper(lines)
-        return vds
 
     def vis_data_batadv_vis(self):
         """
