@@ -19,6 +19,8 @@ from lib.rrddb import RRD
 
 
 def main(params):
+    os.makedirs(params['dest_dir'], exist_ok=True)
+
     nodes_fn = os.path.join(params['dest_dir'], 'nodes.json')
     graph_fn = os.path.join(params['dest_dir'], 'graph.json')
 
@@ -52,7 +54,7 @@ def main(params):
     try:
         with open(nodes_fn, 'r') as nodedb_handle:
             nodedb = json.load(nodedb_handle)
-    except FileNotFoundError:
+    except IOError:
         nodedb = {'nodes': dict()}
 
     # flush nodedb if it uses the old format
