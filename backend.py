@@ -61,6 +61,9 @@ def main(params):
     if 'links' in nodedb:
         nodedb = {'nodes': dict()}
 
+    # set version we're going to output
+    nodedb['version'] = 1
+
     # update timestamp and assume all nodes are offline
     nodedb['timestamp'] = now.isoformat()
     for node_id, node in nodedb['nodes'].items():
