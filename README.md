@@ -60,3 +60,25 @@ For the script's regular execution add the following to the crontab:
 
 - online
 - gateway
+
+# Removing owner information
+
+If you'd like to redact information about the node owner from `nodes.json`,
+you may use a filter like [jq]. In this case, specify an output directory
+different from your webserver directory, e.g.:
+
+    ./backend.py -d /ffmap-data
+
+Don't write to files generated in there. ffmap-backend uses them as its
+database.
+
+After running ffmap-backend, copy `graph.json` to your webserver. Then,
+filter `nodes.json` using `jq` like this:
+
+     jq '.nodes = (.nodes | with_entries(del(.value.nodeinfo.owner)))' \
+       < /ffmap-data/nodes.json > /var/www/data/nodes.json
+
+This will remove owner information from nodes.json before copying the data
+to your webserver.
+
+[jq]: https://stedolan.github.io/jq/
