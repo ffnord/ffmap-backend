@@ -17,6 +17,9 @@ from lib.alfred import Alfred
 from lib.batman import Batman
 from lib.rrddb import RRD
 
+NODES_VERSION = 1
+GRAPH_VERSION = 1
+
 
 def main(params):
     os.makedirs(params['dest_dir'], exist_ok=True)
@@ -62,7 +65,7 @@ def main(params):
         nodedb = {'nodes': dict()}
 
     # set version we're going to output
-    nodedb['version'] = 1
+    nodedb['version'] = NODES_VERSION
 
     # update timestamp and assume all nodes are offline
     nodedb['timestamp'] = now.isoformat()
@@ -119,8 +122,11 @@ def main(params):
     with open(nodes_fn, 'w') as f:
         json.dump(nodedb, f)
 
+    graph_out = {'batadv': json_graph.node_link_data(batadv_graph),
+                 'version': GRAPH_VERSION}
+
     with open(graph_fn, 'w') as f:
-        json.dump({'batadv': json_graph.node_link_data(batadv_graph)}, f)
+        json.dump(graph_out, f)
 
     # optional rrd graphs (trigger with --rrd)
     if params['rrd']:
