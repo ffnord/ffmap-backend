@@ -159,7 +159,7 @@ class RRD(object):
                                ds.unknown_sec), "utf-8"))
 
             if b'</cdp_prep>' in line:
-                restore.stdin.write(added_ds_num*b"""
+                restore.stdin.write(added_ds_num * b"""
                         <ds>
                         <primary_value> NaN </primary_value>
                         <secondary_value> NaN </secondary_value>
@@ -173,7 +173,7 @@ class RRD(object):
                 restore.stdin.write(
                     line.replace(
                         b'</row>',
-                        (added_ds_num*b'<v>NaN</v>')+b'</row>'
+                        (added_ds_num * b'<v>NaN</v>') + b'</row>'
                     )
                 )
 

@@ -8,7 +8,7 @@ from lib.nodes import build_mac_table
 
 def import_vis_data(graph, nodes, vis_data):
     macs = build_mac_table(nodes)
-    nodes_a = map(lambda d: 2*[d['primary']],
+    nodes_a = map(lambda d: 2 * [d['primary']],
                   filter(lambda d: 'primary' in d, vis_data))
     nodes_b = map(lambda d: [d['secondary'], d['of']],
                   filter(lambda d: 'secondary' in d, vis_data))

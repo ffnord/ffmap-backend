@@ -19,7 +19,7 @@ class RRD(object):
         self.displayTimeGlobal = display_time_global
         self.displayTimeNode = display_time_node
 
-        self.currentTimeInt = (int(time.time())/60)*60
+        self.currentTimeInt = (int(time.time()) / 60) * 60
         self.currentTime = str(self.currentTimeInt)
 
         try:
