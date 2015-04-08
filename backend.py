@@ -16,6 +16,7 @@ from lib import graph, nodes
 from lib.alfred import Alfred
 from lib.batman import Batman
 from lib.rrddb import RRD
+from lib.nodelist import export_nodelist
 
 NODES_VERSION = 1
 GRAPH_VERSION = 1
@@ -26,6 +27,7 @@ def main(params):
 
     nodes_fn = os.path.join(params['dest_dir'], 'nodes.json')
     graph_fn = os.path.join(params['dest_dir'], 'graph.json')
+    nodelist_fn = os.path.join(params['dest_dir'], 'nodelist.json')
 
     now = datetime.utcnow().replace(microsecond=0)
 
@@ -127,6 +129,9 @@ def main(params):
 
     with open(graph_fn, 'w') as f:
         json.dump(graph_out, f)
+
+    with open(nodelist_fn, 'w') as f:
+        json.dump(export_nodelist(now, nodedb), f)
 
     # optional rrd graphs (trigger with --rrd)
     if params['rrd']:
