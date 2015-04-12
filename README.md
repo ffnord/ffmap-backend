@@ -18,7 +18,7 @@ Run `backend.py --help` for a quick overview of all available options.
 For the script's regular execution add the following to the crontab:
 
 <pre>
-* * * * * /path/to/ffmap-backend/backend.py -d /path/to/output -a /path/to/aliases.json --vpn ae:7f:58:7d:6c:2a --vpn d2:d0:93:63:f7:da
+* * * * * backend.py -d /path/to/output -a /path/to/aliases.json --vpn ae:7f:58:7d:6c:2a d2:d0:93:63:f7:da
 </pre>
 
 # Data format
