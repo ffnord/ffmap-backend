@@ -13,6 +13,14 @@ class Batman(object):
         self.mesh_interface = mesh_interface
         self.alfred_sock = alfred_sockpath
 
+        # ensure /usr/sbin and /usr/local/sbin are in PATH
+        env = os.environ
+        path = set(env['PATH'].split(':'))
+        path.add('/usr/sbin/')
+        path.add('/usr/local/sbin')
+        env['PATH'] = ':'.join(path)
+        self.environ = env
+
         # compile regular expressions only once on startup
         self.mac_addr_pattern = re.compile(r'(([a-z0-9]{2}:){5}[a-z0-9]{2})')
 
@@ -38,7 +46,7 @@ class Batman(object):
         cmd = ['batadv-vis', '-i', self.mesh_interface, '-f', 'json']
         if self.alfred_sock:
             cmd.extend(['-u', self.alfred_sock])
-        output = subprocess.check_output(cmd)
+        output = subprocess.check_output(cmd, env=self.environ)
         lines = output.splitlines()
         return self.vis_data_helper(lines)
 
@@ -50,7 +58,7 @@ class Batman(object):
         cmd = ['batctl', '-m', self.mesh_interface, 'gwl', '-n']
         if os.geteuid() > 0:
             cmd.insert(0, 'sudo')
-        output = subprocess.check_output(cmd)
+        output = subprocess.check_output(cmd, env=self.environ)
         output_utf8 = output.decode('utf-8')
         rows = output_utf8.splitlines()
 
@@ -79,7 +87,7 @@ class Batman(object):
         cmd = ['batctl', '-m', self.mesh_interface, 'gw']
         if os.geteuid() > 0:
             cmd.insert(0, 'sudo')
-        output = subprocess.check_output(cmd)
+        output = subprocess.check_output(cmd, env=self.environ)
         chunks = output.decode("utf-8").split()
 
         return chunks[0], chunks[3] if 3 in chunks else None

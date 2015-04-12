@@ -147,7 +147,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-a', '--aliases',
                         help='Read aliases from FILE',
-                        nargs='+', metavar='FILE')
+                        nargs='+', default=[], metavar='FILE')
     parser.add_argument('-m', '--mesh',
                         default=['bat0'], nargs='+',
                         help='Use given batman-adv mesh interface(s) (defaults'
