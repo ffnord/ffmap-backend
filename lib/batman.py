@@ -1,5 +1,6 @@
 import subprocess
 import json
+import os
 import re
 
 
@@ -46,8 +47,10 @@ class Batman(object):
         Parse "batctl -m <mesh_interface> gwl -n"
         into an array of dictionaries.
         """
-        output = subprocess.check_output(
-            ['batctl', '-m', self.mesh_interface, 'gwl', '-n'])
+        cmd = ['batctl', '-m', self.mesh_interface, 'gwl', '-n']
+        if os.geteuid() > 0:
+            cmd.insert(0, 'sudo')
+        output = subprocess.check_output(cmd)
         output_utf8 = output.decode('utf-8')
         rows = output_utf8.splitlines()
 
@@ -73,8 +76,10 @@ class Batman(object):
         Parse "batctl -m <mesh_interface> gw"
         return: tuple mode, bandwidth, if mode != server then bandwidth is None
         """
-        output = subprocess.check_output(
-            ['batctl', '-m', self.mesh_interface, 'gw'])
+        cmd = ['batctl', '-m', self.mesh_interface, 'gw']
+        if os.geteuid() > 0:
+            cmd.insert(0, 'sudo')
+        output = subprocess.check_output(cmd)
         chunks = output.decode("utf-8").split()
 
         return chunks[0], chunks[3] if 3 in chunks else None
