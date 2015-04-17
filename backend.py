@@ -15,7 +15,6 @@ from networkx.readwrite import json_graph
 from lib import graph, nodes
 from lib.alfred import Alfred
 from lib.batman import Batman
-from lib.rrddb import RRD
 from lib.nodelist import export_nodelist
 
 NODES_VERSION = 1
@@ -133,13 +132,6 @@ def main(params):
     with open(nodelist_fn, 'w') as f:
         json.dump(export_nodelist(now, nodedb), f)
 
-    # optional rrd graphs (trigger with --rrd)
-    if params['rrd']:
-        script_directory = os.path.dirname(os.path.realpath(__file__))
-        rrd = RRD(os.path.join(script_directory, 'nodedb'),
-                  os.path.join(params['dest_dir'], 'nodes'))
-        rrd.update_database(nodedb['nodes'])
-        rrd.update_images()
 
 
 if __name__ == '__main__':
@@ -160,10 +152,6 @@ if __name__ == '__main__':
                         help='Assume MAC addresses are part of vpn')
     parser.add_argument('-p', '--prune', metavar='DAYS', type=int,
                         help='forget nodes offline for at least DAYS')
-    parser.add_argument('--with-rrd', dest='rrd', action='store_true',
-                        default=False,
-                        help='enable the rendering of RRD graphs (cpu '
-                             'intensive)')
 
     options = vars(parser.parse_args())
     main(options)
