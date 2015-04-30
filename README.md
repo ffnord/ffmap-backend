@@ -18,6 +18,11 @@ For the script's regular execution add the following to the crontab:
 * * * * * backend.py -d /path/to/output -a /path/to/aliases.json --vpn ae:7f:58:7d:6c:2a d2:d0:93:63:f7:da
 </pre>
 
+# Dependencies
+
+- Python Package [Networkx](https://networkx.github.io/)
+- [alfred-json](https://github.com/tcatm/alfred-json)
+
 # Running as unprivileged user
 
 Some information collected by ffmap-backend requires access to specific system resources.
