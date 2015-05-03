@@ -59,7 +59,7 @@ def import_statistics(nodes, stats):
             node['statistics'][target] = f(reduce(dict.__getitem__,
                                                   source,
                                                   statistics))
-        except (KeyError, TypeError):
+        except (KeyError, TypeError, ZeroDivisionError):
             pass
 
     macs = build_mac_table(nodes)
