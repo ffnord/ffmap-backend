@@ -120,6 +120,19 @@ def main(params):
     if params['vpn']:
         graph.mark_vpn(batadv_graph, frozenset(params['vpn']))
 
+    def extract_tunnel(nodes):
+        macs = set()
+        for id, node in nodes.items():
+            try:
+                for mac in node["nodeinfo"]["network"]["mesh"]["bat0"]["interfaces"]["tunnel"]:
+                    macs.add(mac)
+            except KeyError:
+                pass
+
+        return macs
+
+    graph.mark_vpn(batadv_graph, extract_tunnel(nodedb['nodes']))
+
     batadv_graph = graph.merge_nodes(batadv_graph)
     batadv_graph = graph.to_undirected(batadv_graph)
 

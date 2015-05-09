@@ -97,12 +97,29 @@ def import_mesh_ifs_vis_data(nodes, vis_data):
     for v in mesh_nodes:
         node = v[0]
 
-        try:
-            mesh_ifs = set(node['nodeinfo']['network']['mesh_interfaces'])
-        except KeyError:
-            mesh_ifs = set()
+        ifs = set()
 
-        node['nodeinfo']['network']['mesh_interfaces'] = list(mesh_ifs | v[1])
+        try:
+            ifs = ifs.union(set(node['nodeinfo']['network']['mesh_interfaces']))
+        except KeyError:
+            pass
+
+        try:
+            ifs = ifs.union(set(node['nodeinfo']['network']['mesh']['bat0']['interfaces']['wireless']))
+        except KeyError:
+            pass
+
+        try:
+            ifs = ifs.union(set(node['nodeinfo']['network']['mesh']['bat0']['interfaces']['tunnel']))
+        except KeyError:
+            pass
+
+        try:
+            ifs = ifs.union(set(node['nodeinfo']['network']['mesh']['bat0']['interfaces']['other']))
+        except KeyError:
+            pass
+
+        node['nodeinfo']['network']['mesh_interfaces'] = list(ifs | v[1])
 
 
 def import_vis_clientcount(nodes, vis_data):
