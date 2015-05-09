@@ -7,18 +7,30 @@
       "latitude": 53.86
     },
     "network": {
-      "mesh_interfaces": [
-        "00:25:86:e6:f1:bf"
-      ]
+      "mesh": {
+        "bat0": {
+          "interfaces": {
+            "tunnel": [
+              "00:25:86:e6:f1:bf"
+            ]
+          }
+        }
+      }
     }
   },
   {
     "node_id": "gw1",
     "hostname": "burgtor",
     "network": {
-      "mesh_interfaces": [
-        "52:54:00:f3:62:d9"
-      ]
+      "mesh": {
+        "bat0": {
+          "interfaces": {
+            "tunnel": [
+              "52:54:00:f3:62:d9"
+            ]
+          }
+        }
+      }
     }
   }
 ]
