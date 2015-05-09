@@ -11,6 +11,25 @@ def build_mac_table(nodes):
                 macs[mac] = node_id
         except KeyError:
             pass
+
+        try:
+            for mac in node['nodeinfo']['network']['mesh']['bat0']['interfaces']['wireless']:
+                macs[mac] = node_id
+        except KeyError:
+            pass
+
+        try:
+            for mac in node['nodeinfo']['network']['mesh']['bat0']['interfaces']['tunnel']:
+                macs[mac] = node_id
+        except KeyError:
+            pass
+
+        try:
+            for mac in node['nodeinfo']['network']['mesh']['bat0']['interfaces']['other']:
+                macs[mac] = node_id
+        except KeyError:
+            pass
+
     return macs
 
 
