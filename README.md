@@ -79,6 +79,21 @@ will prefix `sudo` where necessary.
 - online
 - gateway
 
+## Old data format
+
+If you want to still use the old [ffmap-d3](https://github.com/ffnord/ffmap-d3)
+front end, you can use the file `ffmap-d3.jq` to convert the new output to the
+old one:
+
+```
+jq -n -f ffmap-d3.jq \
+    --argfile nodes nodedb/nodes.json \
+    --argfile graph nodedb/graph.json \
+    > nodedb/ffmap-d3.json
+```
+
+Then point your ffmap-d3 instance to the `ffmap-d3.json` file.
+
 # Removing owner information
 
 If you'd like to redact information about the node owner from `nodes.json`,
