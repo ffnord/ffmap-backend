@@ -13,6 +13,9 @@ def export_nodelist(now, nodedb):
         node_out["status"] = dict()
         node_out["status"]["online"] = node["flags"]["online"]
 
+        if "firstseen" in node:
+            node_out["status"]["firstcontact"] = node["firstseen"]
+
         if "lastseen" in node:
             node_out["status"]["lastcontact"] = node["lastseen"]
 
