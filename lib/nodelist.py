@@ -15,7 +15,7 @@ def export_nodelist(now, nodedb):
 
         if "firstseen" in node:
             node_out["status"]["firstcontact"] = node["firstseen"]
-        
+
         if "lastseen" in node:
             node_out["status"]["lastcontact"] = node["lastseen"]
 
