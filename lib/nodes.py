@@ -90,7 +90,7 @@ def import_statistics(nodes, stats):
         add(node, stats, 'uptime', ['uptime'])
         add(node, stats, 'loadavg', ['loadavg'])
         add(node, stats, 'memory_usage', ['memory'],
-            lambda d: 1 - d['free'] / d['total'])
+            lambda d: 1 - (d['free'] + d['buffers'] + d['cached']) / d['total'])
         add(node, stats, 'rootfs_usage', ['rootfs_usage'])
         add(node, stats, 'traffic', ['traffic'])
 
