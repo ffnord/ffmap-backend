@@ -19,7 +19,7 @@ from lib.rrddb import RRD
 from lib.nodelist import export_nodelist
 from lib.validate import validate_nodeinfos
 
-NODES_VERSION = 1
+NODES_VERSION = 2
 GRAPH_VERSION = 1
 
 
@@ -58,39 +58,40 @@ def main(params):
 
     # read nodedb state from node.json
     try:
-        with open(nodes_fn, 'r') as nodedb_handle:
+        with open(nodes_fn, 'r', encoding=('UTF-8')) as nodedb_handle:
             nodedb = json.load(nodedb_handle)
     except IOError:
-        nodedb = {'nodes': dict()}
-
-    # flush nodedb if it uses the old format
-    if 'links' in nodedb:
-        nodedb = {'nodes': dict()}
+        nodedb = {'nodes': []}
 
     # set version we're going to output
     nodedb['version'] = NODES_VERSION
 
     # update timestamp and assume all nodes are offline
     nodedb['timestamp'] = now.isoformat()
-    for node_id, node in nodedb['nodes'].items():
+    for node in nodedb['nodes']:
         node['flags']['online'] = False
+
+    nodesdict = {}
+
+    for node in nodedb['nodes']:
+        nodesdict[node['nodeinfo']['node_id']] = node
 
     # integrate alfred nodeinfo
     for alfred in alfred_instances:
         nodeinfo = validate_nodeinfos(alfred.nodeinfo())
-        nodes.import_nodeinfo(nodedb['nodes'], nodeinfo,
+        nodes.import_nodeinfo(nodesdict, nodeinfo,
                               now, assume_online=True)
 
     # integrate static aliases data
     for aliases in params['aliases']:
         with open(aliases, 'r') as f:
             nodeinfo = validate_nodeinfos(json.load(f))
-            nodes.import_nodeinfo(nodedb['nodes'], nodeinfo,
+            nodes.import_nodeinfo(nodesdict, nodeinfo,
                                   now, assume_online=False)
 
-    nodes.reset_statistics(nodedb['nodes'])
+    nodes.reset_statistics(nodesdict)
     for alfred in alfred_instances:
-        nodes.import_statistics(nodedb['nodes'], alfred.statistics())
+        nodes.import_statistics(nodesdict, alfred.statistics())
 
     # acquire gwl and visdata for each batman instance
     mesh_info = []
@@ -102,27 +103,29 @@ def main(params):
 
     # update nodedb from batman-adv data
     for vd, gwl in mesh_info:
-        nodes.import_mesh_ifs_vis_data(nodedb['nodes'], vd)
-        nodes.import_vis_clientcount(nodedb['nodes'], vd)
-        nodes.mark_vis_data_online(nodedb['nodes'], vd, now)
-        nodes.mark_gateways(nodedb['nodes'], gwl)
+        nodes.import_mesh_ifs_vis_data(nodesdict, vd)
+        nodes.import_vis_clientcount(nodesdict, vd)
+        nodes.mark_vis_data_online(nodesdict, vd, now)
+        nodes.mark_gateways(nodesdict, gwl)
 
     # clear the nodedb from nodes that have not been online in $prune days
     if params['prune']:
-        nodes.prune_nodes(nodedb['nodes'], now, params['prune'])
+        nodes.prune_nodes(nodesdict, now, params['prune'])
 
     # build nxnetworks graph from nodedb and visdata
     batadv_graph = nx.DiGraph()
     for vd, gwl in mesh_info:
-        graph.import_vis_data(batadv_graph, nodedb['nodes'], vd)
+        graph.import_vis_data(batadv_graph, nodesdict, vd)
 
     # force mac addresses to be vpn-link only (like gateways for example)
     if params['vpn']:
         graph.mark_vpn(batadv_graph, frozenset(params['vpn']))
 
+    nodedb['nodes'] = list(nodesdict.values())
+
     def extract_tunnel(nodes):
         macs = set()
-        for id, node in nodes.items():
+        for node in nodes:
             try:
                 for mac in node["nodeinfo"]["network"]["mesh"]["bat0"]["interfaces"]["tunnel"]:
                     macs.add(mac)

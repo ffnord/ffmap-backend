@@ -115,3 +115,10 @@ This will remove owner information from nodes.json before copying the data
 to your webserver.
 
 [jq]: https://stedolan.github.io/jq/
+
+
+# Convert from nodes.json version 1 to version 2
+
+    jq '.nodes = (.nodes | to_entries | map(.value)) | .version = 2' \
+    < nodes.json > nodes.json.new
+    mv nodes.json.new nodes.json

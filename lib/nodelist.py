@@ -1,9 +1,9 @@
 def export_nodelist(now, nodedb):
     nodelist = list()
 
-    for node_id, node in nodedb["nodes"].items():
+    for node in nodedb["nodes"]:
         node_out = dict()
-        node_out["id"] = node_id
+        node_out["id"] = node["nodeinfo"]["node_id"]
         node_out["name"] = node["nodeinfo"]["hostname"]
 
         if "location" in node["nodeinfo"]:
