@@ -93,20 +93,18 @@ def main(params):
     for alfred in alfred_instances:
         nodes.import_statistics(nodesdict, alfred.statistics())
 
-    # acquire gwl and visdata for each batman instance
+    # acquire visdata for each batman instance
     mesh_info = []
     for batman in batman_instances:
         vd = batman.vis_data()
-        gwl = batman.gateway_list()
 
-        mesh_info.append((vd, gwl))
+        mesh_info.append(vd)
 
     # update nodedb from batman-adv data
-    for vd, gwl in mesh_info:
+    for vd in mesh_info:
         nodes.import_mesh_ifs_vis_data(nodesdict, vd)
         nodes.import_vis_clientcount(nodesdict, vd)
         nodes.mark_vis_data_online(nodesdict, vd, now)
-        nodes.mark_gateways(nodesdict, gwl)
 
     # clear the nodedb from nodes that have not been online in $prune days
     if params['prune']:
@@ -114,7 +112,7 @@ def main(params):
 
     # build nxnetworks graph from nodedb and visdata
     batadv_graph = nx.DiGraph()
-    for vd, gwl in mesh_info:
+    for vd in mesh_info:
         graph.import_vis_data(batadv_graph, nodesdict, vd)
 
     # force mac addresses to be vpn-link only (like gateways for example)
