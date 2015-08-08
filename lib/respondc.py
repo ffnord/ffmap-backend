@@ -4,18 +4,21 @@ import zlib
 import json
 import sys
 
-def request(ifname, request, target='ff02::2', timeout=0.5, singleshot=False):
+
+def request(request, targets, interface, timeout=0.5, singleshot=False):
   try:
-    if_id = socket.if_nametoindex(ifname)
+    if_id = socket.if_nametoindex(interface)
   except OSError:
-    print('interface \'{}\' not found'.format(sys.argv[1]), file=sys.stderr)
+    print('interface \'{}\' not found'.format(ifname), file=sys.stderr)
     return []
 
   sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
 
   # request
   message = bytes('GET {}'.format(request), 'utf-8')
-  sock.sendto(message, (target, 1001, 0, if_id))
+
+  for target in targets:
+    sock.sendto(message, (target, 1001, 0, if_id))
 
   print('+ {:s}'.format(str(message)), file=sys.stderr)
 

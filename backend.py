@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import sys
+import dateutil.parser
 from datetime import datetime
 
 import networkx as nx
@@ -18,12 +19,29 @@ from lib.batman import Batman
 from lib.rrddb import RRD
 from lib.nodelist import export_nodelist
 from lib.validate import validate_nodeinfos
+from lib.respondc import request
 
 NODES_VERSION = 2
 GRAPH_VERSION = 1
 
+def recently_lost_nodes(now, nodesdict, maxage=600):
+  nodes = []
+  for node in nodesdict.values():
+    lastseen = dateutil.parser.parse(node['lastseen'])
+    age = (now - lastseen).total_seconds()
+
+    if age < maxage and age != 0:
+      nodes.append(node)
+
+  return nodes
 
 def main(params):
+    def node_to_ips(node):
+      try:
+        return node['nodeinfo']['network']['addresses']
+      except KeyError:
+        return []
+
     os.makedirs(params['dest_dir'], exist_ok=True)
 
     nodes_fn = os.path.join(params['dest_dir'], 'nodes.json')
@@ -68,10 +86,10 @@ def main(params):
 
     # update timestamp and assume all nodes are offline
     nodedb['timestamp'] = now.isoformat()
-    for node in nodedb['nodes']:
-        node['flags']['online'] = False
 
     nodesdict = {}
+
+    nodesdict, graph = DO(params, nodesdict, graph)
 
     for node in nodedb['nodes']:
         nodesdict[node['nodeinfo']['node_id']] = node
@@ -79,8 +97,44 @@ def main(params):
     # integrate alfred nodeinfo
     for alfred in alfred_instances:
         nodeinfo = validate_nodeinfos(alfred.nodeinfo())
-        nodes.import_nodeinfo(nodesdict, nodeinfo,
-                              now, assume_online=True)
+        nodes.import_nodeinfo(nodesdict, nodeinfo, now, assume_online=True)
+
+
+    # acquire data from respondd
+    responses = list(request('nodeinfo statistics', ['ff02::2:1001'], interface=params['interface']))
+
+    nodeinfos = list(map(lambda x: x['nodeinfo'], filter(lambda x: 'nodeinfo' in x, responses)))
+    nodes.import_nodeinfo(nodesdict, validate_nodeinfos(nodeinfos), now, assume_online=True)
+
+    ips = [i[0] for i in map(node_to_ips, recently_lost_nodes(now, nodesdict))]
+    a = request('nodeinfo statistics', ips, interface=params['interface'], timeout=2)
+    nodeinfos = list(map(lambda x: x['nodeinfo'], filter(lambda x: 'nodeinfo' in x, a)))
+    nodes.import_nodeinfo(nodesdict, validate_nodeinfos(nodeinfos), now, assume_online=True)
+    responses += a
+
+    ips = [i[0] for i in map(node_to_ips, recently_lost_nodes(now, nodesdict))]
+    a = request('nodeinfo statistics', ips, interface=params['interface'], timeout=2)
+    nodeinfos = list(map(lambda x: x['nodeinfo'], filter(lambda x: 'nodeinfo' in x, a)))
+    nodes.import_nodeinfo(nodesdict, validate_nodeinfos(nodeinfos), now, assume_online=True)
+    responses += a
+
+    ips = [i[0] for i in map(node_to_ips, recently_lost_nodes(now, nodesdict))]
+    a = request('nodeinfo statistics', ips, interface=params['interface'], timeout=2)
+    nodeinfos = list(map(lambda x: x['nodeinfo'], filter(lambda x: 'nodeinfo' in x, a)))
+    nodes.import_nodeinfo(nodesdict, validate_nodeinfos(nodeinfos), now, assume_online=True)
+    responses += a
+
+    for node in nodesdict.values():
+      lastseen = dateutil.parser.parse(node['lastseen'])
+      age = (now - lastseen).total_seconds()
+
+      online = age < params['hysteresis']
+
+      node['flags']['online'] = online
+
+      if not online:
+        nodes.reset_statistics(node)
+
 
     # integrate static aliases data
     for aliases in params['aliases']:
@@ -89,9 +143,10 @@ def main(params):
             nodes.import_nodeinfo(nodesdict, nodeinfo,
                                   now, assume_online=False)
 
-    nodes.reset_statistics(nodesdict)
     for alfred in alfred_instances:
         nodes.import_statistics(nodesdict, alfred.statistics())
+
+    nodes.import_statistics(nodesdict, list(map(lambda x: x['statistics'], filter(lambda x: 'statistics' in x, responses))))
 
     # acquire visdata for each batman instance
     mesh_info = []
@@ -104,7 +159,6 @@ def main(params):
     for vd in mesh_info:
         nodes.import_mesh_ifs_vis_data(nodesdict, vd)
         nodes.import_vis_clientcount(nodesdict, vd)
-        nodes.mark_vis_data_online(nodesdict, vd, now)
 
     # clear the nodedb from nodes that have not been online in $prune days
     if params['prune']:
@@ -166,10 +220,15 @@ if __name__ == '__main__':
                         help='Read aliases from FILE',
                         nargs='+', default=[], metavar='FILE')
     parser.add_argument('-m', '--mesh',
-                        default=['bat0'], nargs='+',
+                        default=[], nargs='+',
                         help='Use given batman-adv mesh interface(s) (defaults'
                              'to bat0); specify alfred unix socket like '
                              'bat0:/run/alfred0.sock.')
+    parser.add_argument('--hysteresis', default=300,
+                        help='Duration (seconds) after which a node is considered to be offline')
+    parser.add_argument('-i', '--interface',
+                        help='Interface for contacting respondd',
+                        required=True)
     parser.add_argument('-d', '--dest-dir', action='store',
                         help='Write output to destination directory',
                         required=True)

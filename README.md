@@ -22,6 +22,7 @@ For the script's regular execution add the following to the crontab:
 
 - Python 3
 - Python 3 Package [Networkx](https://networkx.github.io/)
+- Python 3 Package dateutil
 - [alfred-json](https://github.com/tcatm/alfred-json)
 - rrdtool (if run with `--with-rrd`)
 
