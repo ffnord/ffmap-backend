@@ -152,9 +152,7 @@ def main(params):
 
     # optional rrd graphs (trigger with --rrd)
     if params['rrd']:
-        script_directory = os.path.dirname(os.path.realpath(__file__))
-        rrd = RRD(os.path.join(script_directory, 'nodedb'),
-                  os.path.join(params['dest_dir'], 'nodes'))
+        rrd = RRD(params['rrd_path'], os.path.join(params['dest_dir'], 'nodes'))
         rrd.update_database(nodedb['nodes'])
         rrd.update_images()
 
@@ -177,6 +175,8 @@ if __name__ == '__main__':
                         help='Assume MAC addresses are part of vpn')
     parser.add_argument('-p', '--prune', metavar='DAYS', type=int,
                         help='forget nodes offline for at least DAYS')
+    parser.add_argument('--rrd-path', default=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'nodedb'),
+                        help='path to RRD files')
     parser.add_argument('--with-rrd', dest='rrd', action='store_true',
                         default=False,
                         help='enable the rendering of RRD graphs (cpu '
