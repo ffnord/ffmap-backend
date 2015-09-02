@@ -28,15 +28,15 @@ class RRD(object):
             os.mkdir(self.imagePath)
 
     def update_database(self, nodes):
-        online_nodes = dict(filter(
-            lambda d: d[1]['flags']['online'], nodes.items()))
-        client_count = sum(map(
-            lambda d: d['statistics']['clients'], online_nodes.values()))
-
-        self.globalDb.update(len(online_nodes), client_count)
-        for node_id, node in online_nodes.items():
-            rrd = NodeRRD(os.path.join(self.dbPath, node_id + '.rrd'), node)
-            rrd.update()
+        node_count = 0
+        client_count = 0
+        for node in nodes:
+            if node['flags']['online']:
+                node_count += 1
+                client_count += node['statistics']['clients']
+                rrd = NodeRRD(os.path.join(self.dbPath, node['nodeinfo']['node_id'] + '.rrd'), node)
+                rrd.update()
+        self.globalDb.update(node_count, client_count)
 
     def update_images(self):
         self.globalDb.graph(os.path.join(self.imagePath, "globalGraph.png"),
