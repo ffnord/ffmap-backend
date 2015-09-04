@@ -55,23 +55,24 @@ will prefix `sudo` where necessary.
 
 ## nodes.json
 
-    { 'nodes': {
-        node_id: { 'flags': { flags },
-                   'firstseen': isoformat,
-                   'lastseen': isoformat,
-                   'nodeinfo': {...},         # copied from alfred type 158
-                   'statistics': {
-                      'uptime': double,       # seconds
-                      'memory_usage': double, # 0..1
-                      'clients': double,
-                      'rootfs_usage': double, # 0..1
-                      'loadavg': double,
-                      'gateway': mac
-                    }
-                 },
+    { "nodes": [
+        { "flags": { flags },
+          "firstseen": isoformat,
+          "lastseen": isoformat,
+          "nodeinfo": {...},         # copied from node's nodeinfo announcement
+          "statistics": {
+             "uptime": double,       # seconds
+             "memory_usage": double, # 0..1
+             "clients": double,
+             "rootfs_usage": double, # 0..1
+             "loadavg": double,
+             "gateway": mac
+           }
+        },
         ...
-      }
-      'timestamp': isoformat
+      ]
+      "timestamp": isoformat,
+      "version": 2
     }
 
 ### flags (bool)
@@ -108,7 +109,7 @@ database.
 After running ffmap-backend, copy `graph.json` to your webserver. Then,
 filter `nodes.json` using `jq` like this:
 
-     jq '.nodes = (.nodes | with_entries(del(.value.nodeinfo.owner)))' \
+     jq '.nodes = (.nodes | map(del(.nodeinfo.owner)))' \
        < /ffmap-data/nodes.json > /var/www/data/nodes.json
 
 This will remove owner information from nodes.json before copying the data
