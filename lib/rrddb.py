@@ -31,11 +31,14 @@ class RRD(object):
         node_count = 0
         client_count = 0
         for node in nodes:
-            if node['flags']['online']:
-                node_count += 1
-                client_count += node['statistics']['clients']
+            try:
+                if node['flags']['online']:
+                    node_count += 1
+                    client_count += node['statistics']['clients']
                 rrd = NodeRRD(os.path.join(self.dbPath, node['nodeinfo']['node_id'] + '.rrd'), node)
                 rrd.update()
+            except KeyError:
+                pass
         self.globalDb.update(node_count, client_count)
 
     def update_images(self):
