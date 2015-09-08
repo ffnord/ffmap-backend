@@ -18,6 +18,7 @@ from lib.batman import Batman
 from lib.rrddb import RRD
 from lib.nodelist import export_nodelist
 from lib.validate import validate_nodeinfos
+from lib.graphite import Graphite
 
 NODES_VERSION = 2
 GRAPH_VERSION = 1
@@ -150,6 +151,11 @@ def main(params):
     with open(nodelist_fn, 'w') as f:
         json.dump(export_nodelist(now, nodedb), f)
 
+    # optional Graphite integration
+    if params['graphite']:
+        graphite = Graphite(params['graphite_host'], params['graphite_port'])
+        graphite.update(params['graphite_prefix'], params['graphite_metrics'], nodedb['nodes'])
+
     # optional rrd graphs (trigger with --rrd)
     if params['rrd']:
         rrd = RRD(params['rrd_path'], os.path.join(params['dest_dir'], 'nodes'))
@@ -181,6 +187,19 @@ if __name__ == '__main__':
                         default=False,
                         help='enable the rendering of RRD graphs (cpu '
                              'intensive)')
+
+    # Graphite integration
+    graphite = parser.add_argument_group('graphite integration')
+    graphite.add_argument('--with-graphite', dest='graphite', action='store_true', default=False,
+                          help='Send statistical data to graphite backend')
+    graphite.add_argument('--graphite-host', dest='graphite_host', default="localhost",
+                          help='Hostname of the machine running graphite')
+    graphite.add_argument('--graphite-port', dest='graphite_port', default="2003", type=int,
+                          help='Port of the carbon daemon')
+    graphite.add_argument('--graphite-prefix', dest='graphite_prefix', default="freifunk.nodes.",
+                          help='Storage prefix (default value: \'freifunk.nodes.\')')
+    graphite.add_argument('--graphite-metrics', dest='graphite_metrics', default="clients,loadavg,uptime",
+                          help='Comma separated list of metrics to store (default value: \'clients,loadavg,uptime\')')
 
     options = vars(parser.parse_args())
     main(options)

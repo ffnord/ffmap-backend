@@ -123,3 +123,43 @@ to your webserver.
     jq '.nodes = (.nodes | to_entries | map(.value)) | .version = 2' \
     < nodes.json > nodes.json.new
     mv nodes.json.new nodes.json
+
+
+# Graphite support
+
+## Comand line arguments
+Running `backend.py` with `--with-graphite` will enable graphite support for storing statistical data.
+
+	graphite integration:
+	  --with-graphite       Send statistical data to graphite backend
+	  --graphite-host GRAPHITE_HOST
+	                        Hostname of the machine running graphite
+	  --graphite-port GRAPHITE_PORT
+	                        Port of the carbon daemon
+	  --graphite-prefix GRAPHITE_PREFIX
+	                        Storage prefix (default value: 'freifunk.nodes.')
+	  --graphite-metrics GRAPHITE_METRICS
+	                        Comma separated list of metrics to store (default
+	                        value: 'clients,loadavg,uptime')
+
+## Graphite configuration
+
+### storage-schemas.conf
+
+	[freifunk_node_stats]
+	pattern = ^freifunk\.nodes\.
+	retentions = 60s:1d,5min:7d,1h:30d,1d:4y
+	
+### storage-aggregation.conf
+
+	[freifunk_node_stats_loadavg]
+	pattern = ^freifunk\.nodes\..*\.loadavg$
+	aggregationMethod = avg
+
+	[freifunk_node_stats_clients]
+	pattern = ^freifunk\.nodes\..*\.clients$
+	aggregationMethod = max
+
+	[freifunk_node_stats_uptime]
+	pattern = ^freifunk\.nodes\..*\.uptime$
+	aggregationMethod = last
