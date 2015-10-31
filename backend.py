@@ -160,8 +160,8 @@ def main(params):
     if params['rrd']:
         rrd = RRD(params['rrd_path'], os.path.join(params['dest_dir'], 'nodes'))
         rrd.update_database(nodedb['nodes'])
-        rrd.update_images()
-
+        if params['img']:
+            rrd.update_images()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -171,7 +171,7 @@ if __name__ == '__main__':
                         nargs='+', default=[], metavar='FILE')
     parser.add_argument('-m', '--mesh',
                         default=['bat0'], nargs='+',
-                        help='Use given batman-adv mesh interface(s) (defaults'
+                        help='Use given batman-adv mesh interface(s) (defaults '
                              'to bat0); specify alfred unix socket like '
                              'bat0:/run/alfred0.sock.')
     parser.add_argument('-d', '--dest-dir', action='store',
@@ -184,6 +184,9 @@ if __name__ == '__main__':
     parser.add_argument('--rrd-path', default=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'nodedb'),
                         help='path to RRD files')
     parser.add_argument('--with-rrd', dest='rrd', action='store_true',
+                        default=False,
+                        help='enable the collection of RRD data')
+    parser.add_argument('--with-img', dest='img', action='store_true',
                         default=False,
                         help='enable the rendering of RRD graphs (cpu '
                              'intensive)')
