@@ -140,16 +140,16 @@ def main(params):
 
     # write processed data to dest dir
     with open(nodes_fn, 'w') as f:
-        json.dump(nodedb, f)
+        json.dump(nodedb, f, sort_keys=True)
 
     graph_out = {'batadv': json_graph.node_link_data(batadv_graph),
                  'version': GRAPH_VERSION}
 
     with open(graph_fn, 'w') as f:
-        json.dump(graph_out, f)
+        json.dump(graph_out, f, sort_keys=True)
 
     with open(nodelist_fn, 'w') as f:
-        json.dump(export_nodelist(now, nodedb), f)
+        json.dump(export_nodelist(now, nodedb), f, sort_keys=True)
 
     # optional Graphite integration
     if params['graphite']:
