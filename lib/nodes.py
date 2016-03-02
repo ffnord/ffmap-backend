@@ -84,8 +84,6 @@ def mark_uplink(node, stats):
     except KeyError:
         pass
 
-    node['flags']['uplink'] = False
-
 
 def import_nodeinfo(nodes, nodeinfos, now, assume_online=False):
     for nodeinfo in filter(lambda d: 'node_id' in d, nodeinfos):
@@ -124,7 +122,6 @@ def import_statistics(nodes, stats):
         add(node, stats, 'rootfs_usage', ['rootfs_usage'])
         add(node, stats, 'traffic', ['traffic'])
         mark_uplink(node, stats)
-
 
 
 def import_mesh_ifs_vis_data(nodes, vis_data):
