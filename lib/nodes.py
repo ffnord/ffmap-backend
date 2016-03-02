@@ -56,11 +56,44 @@ def mark_online(node, now):
     node['flags']['online'] = True
 
 
+def check_uplink(group):
+    for peer in group['peers']:
+        if peer['established']:
+            return True
+
+    return False
+
+
+def check_uplink_recursive(groups):
+    for group in groups.values():
+        if check_uplink(group):
+            return True
+
+        if group['groups']:
+            if check_uplink_recursive(group['groups']):
+                return True
+
+    return False
+
+
+def mark_uplink(node):
+    try:
+        if check_uplink_recursive(node['nodeinfo']['statistics']['mesh_vpn']['groups']):
+            node['flags']['uplink'] = True
+            return
+    except KeyError:
+        pass
+
+    node['flags']['uplink'] = False
+
+
 def import_nodeinfo(nodes, nodeinfos, now, assume_online=False):
     for nodeinfo in filter(lambda d: 'node_id' in d, nodeinfos):
         node = nodes.setdefault(nodeinfo['node_id'], {'flags': dict()})
         node['nodeinfo'] = nodeinfo
         node['flags']['online'] = False
+
+        mark_uplink(node)
 
         if assume_online:
             mark_online(node, now)
