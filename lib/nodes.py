@@ -57,8 +57,8 @@ def mark_online(node, now):
 
 
 def check_uplink(group):
-    for peer in group['peers']:
-        if peer['established']:
+    for peer in group['peers'].values():
+        if peer and "established" in peer:
             return True
 
     return False
@@ -76,9 +76,9 @@ def check_uplink_recursive(groups):
     return False
 
 
-def mark_uplink(node):
+def mark_uplink(node, stats):
     try:
-        if check_uplink_recursive(node['nodeinfo']['statistics']['mesh_vpn']['groups']):
+        if check_uplink_recursive(stats['mesh_vpn']['groups']):
             node['flags']['uplink'] = True
             return
     except KeyError:
@@ -92,8 +92,7 @@ def import_nodeinfo(nodes, nodeinfos, now, assume_online=False):
         node = nodes.setdefault(nodeinfo['node_id'], {'flags': dict()})
         node['nodeinfo'] = nodeinfo
         node['flags']['online'] = False
-
-        mark_uplink(node)
+        node['flags']['uplink'] = False
 
         if assume_online:
             mark_online(node, now)
@@ -124,6 +123,8 @@ def import_statistics(nodes, stats):
             lambda d: 1 - (d['free'] + d['buffers'] + d['cached']) / d['total'])
         add(node, stats, 'rootfs_usage', ['rootfs_usage'])
         add(node, stats, 'traffic', ['traffic'])
+        mark_uplink(node, stats)
+
 
 
 def import_mesh_ifs_vis_data(nodes, vis_data):
