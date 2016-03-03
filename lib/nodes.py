@@ -57,30 +57,33 @@ def mark_online(node, now):
 
 
 def check_uplink(group):
-    for peer in group['peers'].values():
-        if peer and "established" in peer:
-            return True
+    peers = []
+    for peer in group['peers']:
+        if group['peers'][peer] and "established" in group['peers'][peer]:
+            peers.append(peer)
 
-    return False
+    return peers
 
 
 def check_uplink_recursive(groups):
+    peers = []
+
     for group in groups.values():
-        if check_uplink(group):
-            return True
+        peers.extend(check_uplink(group))
 
-        if group['groups']:
-            if check_uplink_recursive(group['groups']):
-                return True
+        if 'groups' in group:
+            peers.extend(check_uplink_recursive(group['groups']))
 
-    return False
+    return peers
 
 
 def mark_uplink(node, stats):
     try:
-        if check_uplink_recursive(stats['mesh_vpn']['groups']):
+        peers = check_uplink_recursive(stats['mesh_vpn']['groups'])
+
+        if peers:
             node['flags']['uplink'] = True
-            return
+            node['statistics']['vpn_peers'] = peers
     except KeyError:
         pass
 
