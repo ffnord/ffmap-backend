@@ -50,6 +50,11 @@ def prune_nodes(nodes, now, days):
         del nodes[node_id]
 
 
+def prune_node(nodes, nodeid):
+    if nodeid in nodes:
+        del nodes[nodeid]
+
+
 def mark_online(node, now):
     node['lastseen'] = now.isoformat()
     node.setdefault('firstseen', now.isoformat())

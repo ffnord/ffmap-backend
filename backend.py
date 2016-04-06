@@ -111,6 +111,10 @@ def main(params):
     if params['prune']:
         nodes.prune_nodes(nodesdict, now, params['prune'])
 
+    # clear the nodedb from a specific node by its node id
+    if params['prune_node']:
+        nodes.prune_node(nodesdict, params['prune_node'])
+
     # build nxnetworks graph from nodedb and visdata
     batadv_graph = nx.DiGraph()
     for vd in mesh_info:
@@ -181,6 +185,8 @@ if __name__ == '__main__':
                         help='Assume MAC addresses are part of vpn')
     parser.add_argument('-p', '--prune', metavar='DAYS', type=int,
                         help='forget nodes offline for at least DAYS')
+    parser.add_argument('--prune-node',
+                        help='forget node with specific node id')
     parser.add_argument('--rrd-path', default=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'nodedb'),
                         help='path to RRD files')
     parser.add_argument('--with-rrd', dest='rrd', action='store_true',
