@@ -50,7 +50,7 @@ class NodeRRD(RRD):
                 '-w', '800',
                 '-h', '400',
                 '-l', '0',
-                '-y', '1:1',
+                '-Y',
                 'DEF:clients=' + self.filename + ':clients:AVERAGE',
                 'VDEF:maxc=clients,MAXIMUM',
                 'CDEF:c=0,clients,ADDNAN',
