@@ -14,9 +14,7 @@ Run `backend.py --help` for a quick overview of all available options.
 
 For the script's regular execution add the following to the crontab:
 
-<pre>
-* * * * * backend.py -d /path/to/output -a /path/to/aliases.json --vpn ae:7f:58:7d:6c:2a d2:d0:93:63:f7:da
-</pre>
+    * * * * * backend.py -d /path/to/output -a /path/to/aliases.json --vpn ae:7f:58:7d:6c:2a d2:d0:93:63:f7:da
 
 # Dependencies
 
@@ -87,12 +85,11 @@ If you want to still use the old [ffmap-d3](https://github.com/ffnord/ffmap-d3)
 front end, you can use the file `ffmap-d3.jq` to convert the new output to the
 old one:
 
-```
-jq -n -f ffmap-d3.jq \
-    --argfile nodes nodedb/nodes.json \
-    --argfile graph nodedb/graph.json \
-    > nodedb/ffmap-d3.json
-```
+    jq -n -f ffmap-d3.jq \
+        --argfile nodes nodedb/nodes.json \
+        --argfile graph nodedb/graph.json \
+        > nodedb/ffmap-d3.json
+
 
 Then point your ffmap-d3 instance to the `ffmap-d3.json` file.
 
@@ -110,8 +107,8 @@ database.
 After running ffmap-backend, copy `graph.json` to your webserver. Then,
 filter `nodes.json` using `jq` like this:
 
-     jq '.nodes = (.nodes | map(del(.nodeinfo.owner)))' \
-       < /ffmap-data/nodes.json > /var/www/data/nodes.json
+    jq '.nodes = (.nodes | map(del(.nodeinfo.owner)))' \
+        < /ffmap-data/nodes.json > /var/www/data/nodes.json
 
 This will remove owner information from nodes.json before copying the data
 to your webserver.
@@ -122,7 +119,7 @@ to your webserver.
 # Convert from nodes.json version 1 to version 2
 
     jq '.nodes = (.nodes | to_entries | map(.value)) | .version = 2' \
-    < nodes.json > nodes.json.new
+        < nodes.json > nodes.json.new
     mv nodes.json.new nodes.json
 
 
@@ -131,36 +128,36 @@ to your webserver.
 ## Comand line arguments
 Running `backend.py` with `--with-graphite` will enable graphite support for storing statistical data.
 
-	graphite integration:
-	  --with-graphite       Send statistical data to graphite backend
-	  --graphite-host GRAPHITE_HOST
-	                        Hostname of the machine running graphite
-	  --graphite-port GRAPHITE_PORT
-	                        Port of the carbon daemon
-	  --graphite-prefix GRAPHITE_PREFIX
-	                        Storage prefix (default value: 'freifunk.nodes.')
-	  --graphite-metrics GRAPHITE_METRICS
-	                        Comma separated list of metrics to store (default
-	                        value: 'clients,loadavg,uptime')
+    graphite integration:
+      --with-graphite       Send statistical data to graphite backend
+      --graphite-host GRAPHITE_HOST
+                            Hostname of the machine running graphite
+      --graphite-port GRAPHITE_PORT
+                            Port of the carbon daemon
+      --graphite-prefix GRAPHITE_PREFIX
+                            Storage prefix (default value: 'freifunk.nodes.')
+      --graphite-metrics GRAPHITE_METRICS
+                            Comma separated list of metrics to store (default
+                            value: 'clients,loadavg,uptime')
 
 ## Graphite configuration
 
 ### storage-schemas.conf
 
-	[freifunk_node_stats]
-	pattern = ^freifunk\.nodes\.
-	retentions = 60s:1d,5min:7d,1h:30d,1d:4y
-	
+    [freifunk_node_stats]
+    pattern = ^freifunk\.nodes\.
+    retentions = 60s:1d,5min:7d,1h:30d,1d:4y
+
 ### storage-aggregation.conf
 
-	[freifunk_node_stats_loadavg]
-	pattern = ^freifunk\.nodes\..*\.loadavg$
-	aggregationMethod = avg
+    [freifunk_node_stats_loadavg]
+    pattern = ^freifunk\.nodes\..*\.loadavg$
+    aggregationMethod = avg
 
-	[freifunk_node_stats_clients]
-	pattern = ^freifunk\.nodes\..*\.clients$
-	aggregationMethod = max
+    [freifunk_node_stats_clients]
+    pattern = ^freifunk\.nodes\..*\.clients$
+    aggregationMethod = max
 
-	[freifunk_node_stats_uptime]
-	pattern = ^freifunk\.nodes\..*\.uptime$
-	aggregationMethod = last
+    [freifunk_node_stats_uptime]
+    pattern = ^freifunk\.nodes\..*\.uptime$
+    aggregationMethod = last
