@@ -2,6 +2,15 @@
 
 [![Build Status](https://travis-ci.org/ffnord/ffmap-backend.svg?branch=master)](https://travis-ci.org/ffnord/ffmap-backend)
 
+The `master` branch only supports the old `nodes.json` `v1` format. Please
+consider using the `dev` branch or one of the more advanced aproaches that
+generate `nodes.json` in the new `v2` format or as `meshviewer.json`
+
+ * Yanic: https://github.com/FreifunkBremen/yanic
+ * Hopglass-Server: https://github.com/hopglass/hopglass-server
+
+---
+
 ffmap-backend gathers information on the batman network by invoking :
 
  * batctl (might require root),
@@ -10,14 +19,14 @@ ffmap-backend gathers information on the batman network by invoking :
 
 The output will be written to a directory (`-d output`).
 
-Copy `mkmap.sh-example` to `mkmap.sh` and adapt to your needs, test `backend.py` for example with: 
+Copy `mkmap.sh-example` to `mkmap.sh` and adapt to your needs, test `backend.py` for example with:
 
     backend.py -d /path/to/output -a /path/to/aliases.json --vpn ae:7f:58:7d:6c:2a d2:d0:93:63:f7:da
 
 Run `backend.py --help` for a quick overview of all available options.
 
 For the script's regular execution add the following file to cron in `/etc/cron.d/ffmap-backend`:
- 
+
     MAILTO=example@your-NOC.org
     # Freifunk Map Updates
     PATH=/usr/sbin:/usr/bin:/sbin:/bin
