@@ -10,19 +10,37 @@ ffmap-backend gathers information on the batman network by invoking :
 
 The output will be written to a directory (`-d output`).
 
+Copy `mkmap.sh-example` to `mkmap.sh` and adapt to your needs, test `backend.py` for example with: 
+
+    backend.py -d /path/to/output -a /path/to/aliases.json --vpn ae:7f:58:7d:6c:2a d2:d0:93:63:f7:da
+
 Run `backend.py --help` for a quick overview of all available options.
 
-For the script's regular execution add the following to the crontab:
-
-    * * * * * backend.py -d /path/to/output -a /path/to/aliases.json --vpn ae:7f:58:7d:6c:2a d2:d0:93:63:f7:da
+For the script's regular execution add the following file to cron in `/etc/cron.d/ffmap-backend`:
+ 
+    MAILTO=example@your-NOC.org
+    # Freifunk Map Updates
+    PATH=/usr/sbin:/usr/bin:/sbin:/bin
+    * * * * *       root nice -n 19 /path/to/mkmap.sh > /dev/null 2>&1
+    # EOF
 
 # Dependencies
 
 - Python 3
 - Python 3 Package [Networkx](https://networkx.github.io/)
-    (on debian wheezy: pip-3.2 install networkx)
 - [alfred-json](https://github.com/tcatm/alfred-json)
 - rrdtool (if run with `--with-rrd`)
+
+# Install
+
+on debian jessie:  
+
+    apt-get install python3-networkx cmake libjansson-dev zlib1g-dev
+
+on debian wheezy:
+
+    apt-get install cmake libjansson-dev zlib1g-dev
+    pip-3.2 install networkx
 
 # Running as unprivileged user
 
