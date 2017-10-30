@@ -1,0 +1,22 @@
+#!/bin/bash
+MAXLOAD=2 # don't run when load is equal or bigger than 2.0
+FFMAPPATH='/opt/ffmap-backend'
+TMPPATH='/tmp/ffmap-backend'
+TLD=ffgc
+
+if [ $(pgrep -c $(basename $0)) -gt 1 ]; then 
+  echo $(basename $0) is already running
+  exit 0
+fi
+
+load=`grep -o "^." /proc/loadavg`
+if [ "$load" -gt $MAXLOAD ]; then
+  exit 1
+fi
+
+mkdir -p $TMPPATH
+cd $FFMAPPATH
+cp json/nodes.json $TMPPATH/
+python3 $FFMAPPATH/backend.py -d /$TMPPATH/ --aliases $FFMAPPATH/gateway.json -m bat-$TLD:/var/run/alfred.bat-$TLD.sock -p 62 --vpn de:ad:be:ef:ff:01 de:ad:be:ff:ff:02
+cp /$TMPPATH/* /$FFMAPPATH/json/
+
