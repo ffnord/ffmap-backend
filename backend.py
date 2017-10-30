@@ -60,7 +60,7 @@ def main(params):
     try:
         with open(nodes_fn, 'r') as nodedb_handle:
             nodedb = json.load(nodedb_handle)
-    except IOError:
+    except (IOError, ValueError):
         nodedb = {'nodes': dict()}
 
     # flush nodedb if it uses the old format
